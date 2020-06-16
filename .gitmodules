@@ -1,0 +1,3 @@
+[submodule "cqr_t5/treccastweb"]
+	path = cqr_t5/treccastweb
+	url = https://github.com/daltonj/treccastweb
