@@ -96,8 +96,7 @@ We here prepare a preprocessing script for you to transform CAsT queries into a 
 ```bash
 python cast_preprocess.py <treccastweb/data> <data-split> <output-dir>
 ```
-After transforming the queries, just use the same procedure but replace the `'inputfilename = ...'` with CAsT queries for CQR
-
+After transforming the queries, just use the same procedure but replace the `'input_filename = ...'` with CAsT queries for CQR inferencing.
 
 
 
