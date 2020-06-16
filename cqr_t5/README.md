@@ -90,6 +90,13 @@ for BEAM in {1,5,10,15,20}; do
 done
 ```
 
+Preparing Inference File for CAsT
+---
+We here prepare a preprocessing script for you to transform CAsT queries into a CANARD compatible format:
+```bash
+python cast_preprocess.py <treccastweb/data> <data-split> <output-dir>
+```
+After transforming the queries, just use the same procedure but replace the `'input_filename = ...'` with CAsT queries for CQR inferencing.
 
 
 
