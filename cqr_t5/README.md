@@ -1,6 +1,6 @@
 ---
 title: 'Conversational Question Reformaulation'
-disqus: Matt Yang
+author: Matt Yang
 ---
 
 T5 for Conversational Query Reformulation (CQR)
@@ -9,15 +9,6 @@ T5 for Conversational Query Reformulation (CQR)
 ## Table of Contents
 
 [TOC]
-
-## Beginners Guide
-
-If you are a total beginner to this, start here!
-
-1. Visit hackmd.io
-2. Click "Sign in"
-3. Choose a way to sign in
-4. Start writing note!
 
 Overview
 ---
@@ -68,7 +59,7 @@ t5_mesh_transformer  \
 
 Predicting Queries from History
 ---
-To begin, follow [T5 repo](https://github.com/google-research/text-to-text-transfer-transformer) to install packages. The following guide will show you how to predict the reformulated queries with the trained T5 model and the data from CANARD and CAsT.
+To begin, follow [T5 repo](https://github.com/google-research/text-to-text-transfer-transformer) to install packages. The following guide will show you how to predict the reformulated queries with the trained T5 model and the data from CANARD.
 ```bash
 pip install t5[gcp]
 
