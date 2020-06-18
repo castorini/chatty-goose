@@ -41,6 +41,7 @@ Evaluation results
 ---
 The results of eval set is better than the number we reported in our paper due to the removal of Washinton Post in our Corpus here.
             | Train  |  Eval  |
+------------| :------: | :------:
 mAP         | 0.1492 | 0.2114 |
 Recall@1000 | 0.8698 | 0.7297 |
 NDCG@1      | 0.0952 | 0.2611 |
