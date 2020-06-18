@@ -20,4 +20,4 @@ python trec-cast-tools/src/main/python/marco_trecweb.py \
 # Corpus combine
 cat $CARCorpus.xml $MsMarcoCorpus.xml > ./corpus/CAsT_collection.tsv
 ```
-After that you can index CAsT_collection.tsv following the instruction in [Anserini: BM25 Baselines on MS MARCO Passage Retrieval](https://github.com/castorini/anserini/blob/master/docs/experiments-msmarco-passage.md).
+After that you can index CAsT_collection.tsv following the instruction in [Anserini: BM25 Baselines on MS MARCO Passage Retrieval](https://github.com/castorini/anserini/blob/master/docs/experiments-msmarco-passage.md). To run conversational query reformulation using T5 or HQE, please see the readme in cqr_t5 and cqr_hqe.
