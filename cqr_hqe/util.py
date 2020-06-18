@@ -75,7 +75,20 @@ def word_score(query, searcher, JString):
 
     return proc_query
 
+def read_corpus(corpus_path):
+    id_to_doc = {}
+    with open(corpus_path, 'r') as f:
+        print('Read Corpus...')
+        for line in f:
+            try:
+                text = line.strip().split("\t")
+                docid = text[0]
+                doc= ' '.join(text[1:])
+                id_to_doc[docid] = doc
+            except:
+                print("skip %s"%(line.strip()))
 
+    return id_to_doc
 
 
 def exact_key_word(proc_query, turn_id, low, up, key_word_list, filter):
@@ -95,9 +108,9 @@ def exact_key_word(proc_query, turn_id, low, up, key_word_list, filter):
                     key_word_list[turn_id].append(word)
     return key_word_list
 
-def list_to_query_expansion(key_word_list, start_turn, end_turn):
+def query_expansion(key_word_list, start_turn, end_turn):
     query_expansion = ''
     for turn in range(start_turn, end_turn):
         for word in key_word_list[turn]:
-            query_expansion= query_expansion+' ' + word
+            query_expansion= query_expansion+' '+ word
     return query_expansion
