@@ -40,9 +40,11 @@ $path_for_anserini/eval/trec_eval.9.0.4/trec_eval -c -mrecall.1000 -mmap -mndcg_
 Evaluation results
 ---
 The results of eval set is better than the number we reported in our paper due to the removal of Washinton Post in our Corpus here.
-            | Train  |  Eval  |
+
+
+Results  | Train  | Eval
 ------------| :------: | :------:
-mAP         | 0.1492 | 0.2114 |
-Recall@1000 | 0.8698 | 0.7297 |
-NDCG@1      | 0.0952 | 0.2611 |
-NDCG@3      | 0.1205 | 0.2586 |
+mAP         | 0.1492 | 0.2114
+Recall@1000 | 0.8698 | 0.7297
+NDCG@1      | 0.0952 | 0.2611
+NDCG@3      | 0.1205 | 0.2586
