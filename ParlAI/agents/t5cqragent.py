@@ -47,6 +47,9 @@ class T5CQRBM25Agent(Agent):
 
         hits = self.searcher.search(rewrite_text)
         self.responses = [json.loads(hits[i].raw) for i in range(5)]
+
+        if observation.get('episode_done'):
+            self.history = []
     
     def act(self):
         # Always return a string like this.
