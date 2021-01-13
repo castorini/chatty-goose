@@ -44,7 +44,7 @@ class ConversationSearchAgent(Agent):
             self.T5  = T5CQR(opt['from_pretrained'])
         if self.cqr_model == 'HQE' or self.cqr_model == 'fusion':
             self.HQE = HQE(opt['M'], opt['eta'], opt['R_topic'], opt['R_sub'], opt['filter'], opt['verbose'])
-        self.searcher = SimpleSearcher(opt['from_prebuilt'])
+        self.searcher = SimpleSearcher.from_prebuilt_index(opt['from_prebuilt'])
         self.searcher.set_bm25(float(opt['k1']), float(opt['b']))
     def observe(self, observation):
         # Gather the last word from the other user's input
