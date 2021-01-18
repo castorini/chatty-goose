@@ -9,7 +9,7 @@ from cqr_hqe.util import reciprocal_rank_fusion
 @register_agent("ConversationalSearcher")
 class ConversationSearchAgent(Agent):
     @classmethod
-    def add_cmdline_args(cls, parser):
+    def add_cmdline_args(cls, parser, partial_opt=None):
         parser.add_argument('--name', type=str, default='h2oloo', help="The agent's name.")
         parser.add_argument('--cqr_model', type=str, default='T5', help="HQE, T5 or fusion")
         # pyserini
