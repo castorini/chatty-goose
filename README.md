@@ -1,6 +1,26 @@
 # Multi-stage Conversational Passage Retrieval: An Approach to Fusing Term Importance Estimation and Neural Query Rewriting
 ---
 You have to install [Anserini](https://github.com/castorini/pyserini) and [SpaCy](https://spacy.io/)
+
+# Environment setup
+---
+Python >= 3.7
+
+```shell=bash
+pip install parlai
+pip install transformers
+pip install pyserini
+pip install spacy
+python -m spacy download en_core_web_sm # download en package
+```
+
+# Interactive mode
+---
+Example:
+```shell=bash
+python cqragent.py --cqr_model [T5,HQE, or fusion] \
+                   --k1 [0.82] --b [0.68] # bm25 ranker parameter \
+```
 <!-- and follow the guideline on [TREC web](https://github.com/daltonj/treccastweb) downloading the corpus and data. -->
 
 <!-- Data Preparation
