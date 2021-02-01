@@ -18,12 +18,12 @@ limitations under the License.
 import argparse
 import time
 import json
-import numpy as np
-import collections
+
 # from util import read_corpus, word_score, exact_key_word, query_expansion
+from pygaggle.rerank.base import Query, hits_to_texts
+from pygaggle.rerank.transformer import MonoBERT
 from pyserini.search import SimpleSearcher
-from pyserini.index import IndexReader
-from hqe import HQE
+from cqr_hqe.model import HQE
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='HQE for CAsT.')
@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', required=True, default='', help='index path')
     parser.add_argument('--hits', default=10, help='number of hits to retrieve')
+    parser.add_argument('--rerank', action='store_true', default=False, help='rerank BM25 output using BERT')
     parser.add_argument('--corpus', help='input corpus with the format docid \t document')
     # See our MS MARCO documentation to understand how these parameter values were tuned.
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
@@ -58,6 +59,10 @@ if __name__ == '__main__':
         searcher.set_rm3(args.fbTerms, args.fbDocs, args.originalQueryWeight)
         print('Initializing RM3, setting fbTerms={}, fbDocs={} and originalQueryWeight={}'.format(args.fbTerms, args.fbDocs, args.originalQueryWeight))
 
+    # Initialize reranker
+    reranker = None
+    if args.rerank:
+        reranker = MonoBERT()
 
     HQE_for_BM25 = HQE(args.M0, args.eta0, args.R0_topic, args.R0_sub, args.filter, True)
     HQE_for_BERT = HQE(args.M1, args.eta1, args.R0_topic, args.R1_sub, args.filter)
@@ -187,12 +192,23 @@ if __name__ == '__main__':
                                         hist_word = hist_word+ ' ' + word
                         query_for_bert= hist_word + ' ' + query_for_bert
 
-
+                    # Perform BM25 search
                     hits = searcher.search(query_for_anserini, int(args.hits))
+                    
+                    # Perform reranking using BERT
+                    if reranker is not None:
+                        texts = hits_to_texts(hits)
+                        reranked = reranker.rerank(Query(query_for_bert), texts)
+                        reranked_scores = [r.score for r in reranked]
+                        
+                        # Reorder hits with reranker scores
+                        reranked = list(zip(hits, reranked_scores))
+                        reranked.sort(key=lambda x: x[1], reverse=True)
+                        hits = [r[0] for r in reranked]
+
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         # doc = id_to_doc[docno]
-
 
                         fout0.write('{}\t{}\t{}\n'.format(qid, docno, rank + 1))
                         # fout1.write('{}\t{}\t{}\t{}\n'.format(qid, docno, query_for_bert, doc))

@@ -1,5 +1,11 @@
 # Multi-stage Conversational Passage Retrieval: An Approach to Fusing Term Importance Estimation and Neural Query Rewriting
+
 ---
+
+[![PyPI](https://img.shields.io/pypi/v/INSERT_NAME?color=brightgreen)](https://pypi.org/project/chatty-goose/)
+[![LICENSE](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
+
+
 You have to install [Anserini](https://github.com/castorini/pyserini) and [SpaCy](https://spacy.io/)
 <!-- and follow the guideline on [TREC web](https://github.com/daltonj/treccastweb) downloading the corpus and data. -->
 
