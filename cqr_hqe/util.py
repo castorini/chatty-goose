@@ -13,7 +13,7 @@ def reciprocal_rank_fusion(list1, list2, k=60):
 
     for pos, docid in enumerate(list2, start=1):
         doc_scores[docid] = doc_scores.get(docid, 0.0) + 1.0 / (k + pos)
-    doc_scores= {k: v for k, v in sorted(doc_scores.items(), key=lambda item: item[1], reverse=True)}
+    result = {k: v for k, v in sorted(iter(doc_scores.items()), key=lambda x:(-x[1],x[0]))}
 
-    return [*doc_scores]
+    return result
 
