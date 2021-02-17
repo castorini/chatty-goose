@@ -80,7 +80,7 @@ class ConversationSearchAgent(Agent):
             hqe_rewrite_text = self.HQE.rewrite(self.query, self.searcher)
             hits = self.searcher.search(hqe_rewrite_text, 1000)
             hqe_docids = [hits[i].docid for i in range(1000)]
-            docid = reciprocal_rank_fusion(t5_docids, hqe_docids)[0]
+            docid = list(reciprocal_rank_fusion(t5_docids, hqe_docids).keys())[0]
 
 
         return {
