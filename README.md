@@ -34,10 +34,10 @@ We first deduplicate and generate CAR and Msmarco corpus with the format "Docid 
 ```shell=bash
 mkdir corpus
 # Corpus dedupe
-python trec-cast-tools/src/main/python/car_trecweb.py \
+python data/trec-cast-tools/src/main/python/car_trecweb.py \
          $CARCorpus \
          ./corpus/
-python trec-cast-tools/src/main/python/marco_trecweb.py \
+python data/trec-cast-tools/src/main/python/marco_trecweb.py \
          $MsMarcoCorpus \
          ./corpus/ \
          ./duplicate_file/msmarco_duplicate_list_v1.0.txt

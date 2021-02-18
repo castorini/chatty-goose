@@ -4,23 +4,19 @@ import argparse
 from pathlib import Path
 from spacy.lang.en import English
 
-PATH = "treccastweb/2019/data/evaluation/"
-FILE = "evaluation_topics_v1.0.json"
-OUTPUT = "test-src.cast.txt"
-
 
 def main():
+    """Prepare inference file by transforming CAsT queries into CANARD format"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("data_dir")
-    parser.add_argument("split")
-    parser.add_argument("output_dir")
+    parser.add_argument("input_queries", help="Input CAsT query JSON")
+    parser.add_argument("output_dir", help="Output inference file path")
     args = parser.parse_args()
 
     nlp = English()
 
-    with open(
-        Path(args.data_dir, args.split, args.split + "_topics_v1.0.json"), "r"
-    ) as fin, open(Path(args.output_dir, args.split + "-src.cast.txt"), "w") as fout:
+    with open(Path(args.input_queries), "r") as fin, open(
+        Path(args.output_dir), "w"
+    ) as fout:
         js_list = json.load(fin)
         for topic in js_list:
             history = []

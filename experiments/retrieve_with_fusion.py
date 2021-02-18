@@ -1,14 +1,15 @@
 import argparse
+from chattygoose.util import reciprocal_rank_fusion
 import json
 import time
 
-from chattygoose.models import T5_NTR
+from chattygoose.models import HQE, T5_NTR
 from pygaggle.rerank.base import Query, hits_to_texts
 from pygaggle.rerank.transformer import MonoBERT
 from pyserini.search import SimpleSearcher
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='T5 NTR for CAsT.')
+    parser = argparse.ArgumentParser(description='HQE for CAsT.')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', required=True, default='', help='index path')
@@ -23,6 +24,17 @@ if __name__ == "__main__":
     parser.add_argument('--fbTerms', default=10, type=int, help='RM3 parameter: number of expansion terms')
     parser.add_argument('--fbDocs', default=10, type=int, help='RM3 parameter: number of documents')
     parser.add_argument('--originalQueryWeight', default=0.8, type=float, help='RM3 parameter: weight to assign to the original query')
+    
+    # HQE related hyperparameters. The default is tuned on CAsT train data
+    parser.add_argument('--M0', default=5, type=int, help='aggregate historcial queries for first stage (BM25) retrieval')
+    parser.add_argument('--M1', default=1, type=int, help='aggregate historcial queries for second stage (BERT) retrieval')
+    parser.add_argument('--eta0', default=10, type=float, help='QPP threshold for first stage (BM25) retrieval')
+    parser.add_argument('--eta1', default=12, type=float, help='QPP threshold for second stage (BERT) retrieval')
+    parser.add_argument('--R0_topic', default=4.5, type=float, help='Topic keyword threshold for first stage (BM25) retrieval')
+    parser.add_argument('--R1_topic', default=4, type=float, help='Topic keyword threshold for second stage (BERT) retrieval')
+    parser.add_argument('--R0_sub', default=3.5, type=float, help='Subtopic keyword threshold for first stage (BM25) retrieval')
+    parser.add_argument('--R1_sub', default=3, type=float, help='Subtopic keyword threshold for second stage (BERT) retrieval')
+    parser.add_argument('--QR_method', default='hqe', help='input_query') #origin, concat, hqe
     parser.add_argument('--filter', default='pos', help='filter word method') #pos, no
     
     # Parameters for T5
@@ -47,6 +59,10 @@ if __name__ == "__main__":
     if args.rerank:
         reranker = MonoBERT()
 
+    HQE_for_BM25 = HQE(
+        args.M0, args.eta0, args.R0_topic, args.R0_sub, args.filter, True
+    )
+    HQE_for_BERT = HQE(args.M1, args.eta1, args.R0_topic, args.R1_sub, args.filter)
     cqr = T5_NTR(
         model_name="castorini/t5-base-canard",
         max_length=args.max_length,
@@ -65,8 +81,8 @@ if __name__ == "__main__":
             initial_time = time.time()
             for session in data:
                 session_num = str(session["number"])
-                start_time = time.time()
 
+                start_time = time.time()
                 for turn_id, conversations in enumerate(session["turn"]):
                     query = conversations["raw_utterance"]
                     total_query_count += 1
@@ -77,11 +93,15 @@ if __name__ == "__main__":
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    # Generate query
+                    # Generate new queries
+                    query_for_anserini = HQE_for_BM25.rewrite(query, searcher)
+                    query_for_bert = HQE_for_BERT.rewrite(query, searcher)
                     rewritten_query = cqr.rewrite(query)
 
                     # Perform BM25 search
-                    hits = searcher.search(rewritten_query, int(args.hits))
+                    hits_1 = searcher.search(query_for_anserini, int(args.hits))
+                    hits_2 = searcher.search(rewritten_query, int(args.hits))
+                    hits = reciprocal_rank_fusion(hits_1, hits_2, k=60)
 
                     # Perform reranking using BERT
                     if reranker is not None:
@@ -98,6 +118,8 @@ if __name__ == "__main__":
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
 
+                HQE_for_BM25.reset_history()
+                HQE_for_BERT.reset_history()
                 cqr.reset_history()
                 time_per_query = (time.time() - start_time) / (turn_id + 1)
                 print(
