@@ -1,5 +1,5 @@
-output/*.tsv
-output/*.trec
+output/*
+!output/.gitkeep
 .vscode/
 
 # Byte-compiled / optimized / DLL files
