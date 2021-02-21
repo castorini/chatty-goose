@@ -10,7 +10,7 @@ excluded = ["data*", "experiments*"]
 
 
 setuptools.setup(
-    name="chattygoose",
+    name="chatty-goose",
     version="0.1.0",
     author="Anserini Gaggle",
     author_email="anserini.gaggle@gmail.com",
@@ -22,7 +22,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=excluded),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",

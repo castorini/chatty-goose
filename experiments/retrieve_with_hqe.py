@@ -2,7 +2,7 @@ import argparse
 import json
 import time
 
-from chattygoose.models import HQE
+from chatty_goose.models import HQE
 from pygaggle.rerank.base import Query, hits_to_texts
 from pygaggle.rerank.transformer import MonoBERT
 from pyserini.search import SimpleSearcher

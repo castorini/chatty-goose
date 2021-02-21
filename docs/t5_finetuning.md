@@ -1,30 +1,26 @@
 ---
-title: 'Conversational Question Reformulation'
+title: "Conversational Question Reformulation"
 author: Matt Yang
 ---
 
-T5 for Conversational Query Reformulation (CQR)
-===
+# T5 for Conversational Query Reformulation (CQR)
 
-## Table of Contents
+## Overview
 
-[TOC]
+This is the runbook of fine-tuning T5 for the conversational query reformulation task for TREC-CAsT 2019 dataset.
 
-Overview
----
-This is the runbook of fintuning T5 for the conversational query reformulation task for TREC-CAsT 2019 dataset.
+## Training data preparation
 
-Training data preparation
----
 We first use a conversational query reformulation dataset from [CANARD](https://sites.google.com/view/qanta/projects/canard).
+
 > [Dataset Paper (EMNLP'19)](http://users.umiacs.umd.edu/~jbg/docs/2019_emnlp_sequentialqa.pdf)
 
 First, we use the dataset and preprocessing script released by the authors. Note that you have to install [SpaCy](https://spacy.io/) by yourself.
-The following guide is based on a snapshot (hashkey: da8639) of the [CANARD github repo](https://github.com/aagohary/canard):
+Make sure you have cloned the submodules for this repository, which will pull the latest changes from `canard` under `data/canard`.
+
 ```shell=bash
-git clone https://github.com/aagohary/canard
 # run preprocessing script
-cd canard
+cd data/canard
 # modify & run preprocessing script
 sed 's/seq2seq\/release/release/g' preprocess.sh > preprocess.mod.sh
 bash preprocess.mod.sh
@@ -32,10 +28,11 @@ bash preprocess.mod.sh
 # prepare a tsv file for finetuning T5
 paste data/seq2seq/train-src.txt data/seq2seq/train-tgt.tsv > history_query_pair.tsv
 ```
+
 And we have the trainig data for T5 `history_query_pair.train.tsv`
 
-Replicating T5 fintuning for CQR
----
+## Replicating T5 fine-tuning for CQR
+
 To begin, follow [T5 repo](https://github.com/google-research/text-to-text-transfer-transformer) to install packages. The following guide will show you how to train/predict the reformulated queries with the T5 model and the data from CANARD.
 Here we show how to use [Text-To-Text Transfer Transformer (T5)](https://github.com/google-research/text-to-text-transfer-transformer) model from its original github repo to finetune T5 as a CQR module. The following command will train a T5-base model for 4k iterations to predict queries from passages. We assume you put the tsv training file in `gs://your_bucket/data/history_query_pairs.train.tsv` (download from above). Also, change `your_tpu_name`, `your_tpu_zone`, `your_project_id`, and `your_bucket` accordingly.
 
@@ -63,11 +60,11 @@ t5_mesh_transformer  \
   --gin_param="tokens_per_batch = 131072"
 ```
 
-Predicting Queries from History
----
+## Predicting Queries from History
+
 ```bash
 # prepare your data on the google cloud storage
-gsutil cp canard/data/seq2seq/test-src.txt gs://your_bucket/data/test-src.canard.txt
+gsutil cp data/canard/data/seq2seq/test-src.txt gs://your_bucket/data/test-src.canard.txt
 ```
 
 ```bash
@@ -94,20 +91,12 @@ for BEAM in {1,5,10,15,20}; do
 done
 ```
 
-Preparing Inference File for CAsT
----
+## Preparing Inference File for CAsT
+
 We here prepare a preprocessing script for you to transform CAsT queries into a CANARD compatible format:
+
 ```bash
-python -m data.cast_preprocess.py <treccastweb/data> <data-split> <output-dir>
+python -m data.cast_preprocess.py data/treccastweb/2019/data/evaluation/evaluation_topics_v1.0.json data/eval-queries.txt
 ```
+
 After transforming the queries, just use the same procedure but replace the `'input_filename = ...'` with CAsT queries for CQR inferencing.
-
-
-## Appendix and FAQ
-
-:::info
-**Find this document incomplete?** Leave a comment!
-:::
-
-###### tags: `Templates` `Documentation`
-

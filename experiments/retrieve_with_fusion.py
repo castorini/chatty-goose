@@ -1,15 +1,15 @@
 import argparse
-from chattygoose.util import reciprocal_rank_fusion
+from chatty_goose.util import reciprocal_rank_fusion
 import json
 import time
 
-from chattygoose.models import HQE, T5_NTR
+from chatty_goose.models import HQE, T5_NTR
 from pygaggle.rerank.base import Query, hits_to_texts
 from pygaggle.rerank.transformer import MonoBERT
 from pyserini.search import SimpleSearcher
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='HQE for CAsT.')
+    parser = argparse.ArgumentParser(description='Fusion using HQE and NTR for CAsT.')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', required=True, default='', help='index path')

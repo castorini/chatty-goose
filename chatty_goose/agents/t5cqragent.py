@@ -1,6 +1,6 @@
 from parlai.core.agents import Agent, register_agent
 from pyserini.search import SimpleSearcher
-from chattygoose.models import T5_NTR
+from chatty_goose.models import T5_NTR
 
 @register_agent("t5cqrbm25ranker")
 class T5CQRBM25Agent(Agent):

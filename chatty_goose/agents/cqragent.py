@@ -1,5 +1,5 @@
-from chattygoose.models import HQE, T5_NTR
-from chattygoose.util import reciprocal_rank_fusion
+from chatty_goose.models import HQE, T5_NTR
+from chatty_goose.util import reciprocal_rank_fusion
 from parlai.core.agents import Agent, register_agent
 from pyserini.search import SimpleSearcher
 

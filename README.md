@@ -2,29 +2,39 @@
 
 ---
 
-[![PyPI](https://img.shields.io/pypi/v/chattygoose?color=brightgreen)](https://pypi.org/project/chattygoose/)
+[![PyPI](https://img.shields.io/pypi/v/chatty-goose?color=brightgreen)](https://pypi.org/project/chatty-goose/)
 [![LICENSE](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
-## Quickstart Guide
+## Installation
 
-1. Install the `chattygoose` PyPI module
+1. Make sure Java 11+ and Python 3.6+ are installed 
 
+2. Install the `chatty-goose` PyPI module
 ```
 pip install chatty-goose
 ```
 
-2. Load a new pretrained agent
-
-```
-from chattygoose.agents import ConversationalAgent
-
-# TODO
-```
-
 <!--
-You have to install [Anserini](https://github.com/castorini/pyserini) and [SpaCy](https://spacy.io/)
-and follow the guideline on [TREC web](https://github.com/daltonj/treccastweb) downloading the corpus and data.
+## Quickstart Guide
+
+1. Load a new pretrained agent
+```
+TODO
+```
 -->
+
+## Running Experiments
+
+1. Clone the repo and all submodules (`git submodule update --init --recursive`)
+
+2. Clone and build [Anserini](https://github.com/castorini/anserini) for evaluation tools
+
+3. Install dependencies
+```
+pip install -r requirements.txt
+```
+
+4. Follow the appropriate instructions under `docs/` to run experiments using HQE, T5, or fusion.
 
 <!--
 ## Data Preparation
