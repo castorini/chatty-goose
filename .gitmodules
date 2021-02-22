@@ -1,6 +1,9 @@
-[submodule "cqr_t5/treccastweb"]
-	path = cqr_t5/treccastweb
+[submodule "data/trec-cast-tools"]
+	path = data/trec-cast-tools
+	url = https://github.com/gla-ial/trec-cast-tools
+[submodule "data/treccastweb"]
+	path = data/treccastweb
 	url = https://github.com/daltonj/treccastweb
-[submodule "cqr_t5/canard"]
-	path = cqr_t5/canard
+[submodule "data/canard"]
+	path = data/canard
 	url = https://github.com/aagohary/canard
