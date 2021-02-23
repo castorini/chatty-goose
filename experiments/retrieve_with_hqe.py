@@ -2,6 +2,10 @@ import argparse
 import json
 import time
 
+import torch
+from transformers import AutoModelForSequenceClassification
+from transformers.models.auto.tokenization_auto import AutoTokenizer
+
 from chatty_goose.models import HQE
 from pygaggle.rerank.base import Query, hits_to_texts
 from pygaggle.rerank.transformer import MonoBERT
@@ -14,7 +18,6 @@ if __name__ == "__main__":
     parser.add_argument('--index', required=True, default='', help='index path')
     parser.add_argument('--hits', default=10, help='number of hits to retrieve')
     parser.add_argument('--rerank', action='store_true', default=False, help='rerank BM25 output using BERT')
-    parser.add_argument('--corpus', help='input corpus with the format docid \t document')
     
     # See our MS MARCO documentation to understand how these parameter values were tuned.
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
@@ -51,7 +54,9 @@ if __name__ == "__main__":
     # Initialize reranker
     reranker = None
     if args.rerank:
-        reranker = MonoBERT()
+        model = MonoBERT.get_model('/content/monobert-large-msmarco-finetuned')
+        tokenizer = MonoBERT.get_tokenizer('/content/monobert-large-msmarco-finetuned')
+        reranker = MonoBERT(model, tokenizer)
 
     HQE_for_BM25 = HQE(
         args.M0, args.eta0, args.R0_topic, args.R0_sub, args.filter, True

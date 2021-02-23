@@ -14,7 +14,6 @@ if __name__ == "__main__":
     parser.add_argument('--index', required=True, default='', help='index path')
     parser.add_argument('--hits', default=10, help='number of hits to retrieve')
     parser.add_argument('--rerank', action='store_true', default=False, help='rerank BM25 output using BERT')
-    parser.add_argument('--corpus', help='input corpus with the format docid \t document')
     
     # See our MS MARCO documentation to understand how these parameter values were tuned.
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
