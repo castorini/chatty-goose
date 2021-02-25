@@ -17,7 +17,7 @@ setuptools.setup(
     description="A conversational passage retrieval toolkit",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jacklin64/Conversational-IR",
+    url="https://github.com/jacklin64/chatty-goose",
     install_requires=requirements,
     packages=setuptools.find_packages(exclude=excluded),
     classifiers=[

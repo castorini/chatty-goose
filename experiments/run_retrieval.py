@@ -2,8 +2,8 @@ import argparse
 import json
 import time
 
-from chatty_goose.cqr import CQR
-from chatty_goose.retrievers import HQE, T5_NTR
+from chatty_goose.cqr import HQE, T5_NTR
+from chatty_goose.pipeline import RetrievalPipeline
 from chatty_goose.settings import HQESettings, SearcherSettings, T5Settings
 from chatty_goose.types import CQRType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
@@ -52,7 +52,7 @@ def parse_experiment_args():
     return args
 
 
-def run_experiment(cqr: CQR):
+def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
         with open(args.output + ".doc.tsv", "w") as fout1:
 
@@ -76,12 +76,12 @@ def run_experiment(cqr: CQR):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    hits = cqr.retrieve(query)
+                    hits = rp.retrieve(query)
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
 
-                cqr.reset_history()
+                rp.reset_history()
                 time_per_query = (time.time() - start_time) / (turn_id + 1)
                 print(
                     "Retrieving session {} with {} queries ({:0.3f} s/query)".format(
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         )
         reranker_query_retriever = HQE(searcher, hqe_bert_settings)
 
-    cqr = CQR(
+    rp = RetrievalPipeline(
         searcher,
         retrievers,
         searcher_num_hits=args.hits,
@@ -163,4 +163,4 @@ if __name__ == "__main__":
         reranker=reranker,
         reranker_query_retriever=reranker_query_retriever,
     )
-    run_experiment(cqr)
+    run_experiment(rp)

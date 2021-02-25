@@ -1,7 +1,7 @@
 import logging
 
-from chatty_goose.cqr import CQR
-from chatty_goose.retrievers import HQE, T5_NTR
+from chatty_goose.cqr import HQE, T5_NTR
+from chatty_goose.pipeline import RetrievalPipeline
 from chatty_goose.settings import HQESettings, T5Settings
 from chatty_goose.types import CQRType, PosFilter
 from parlai.core.agents import Agent, register_agent
@@ -62,21 +62,21 @@ class ConversationSearchAgent(Agent):
             t5 = T5_NTR(t5_settings)
             retrievers.append(t5)
 
-        self.cqr = CQR(searcher, retrievers, int(opt["hits"]))
+        self.rp = RetrievalPipeline(searcher, retrievers, int(opt["hits"]))
 
     def observe(self, observation):
         # Gather the last word from the other user's input
         self.query = observation.get("text", "")
         if observation.get("episode_done") or self.query == self.episode_done:
             logging.info("Resetting agent history")
-            self.cqr.reset_history()
+            self.rp.reset_history()
 
     def act(self):
         if self.query == self.episode_done:
             return {"id": self.id, "text": "Session finished"}
 
         # Retrieve hits
-        hits = self.cqr.retrieve(self.query)
+        hits = self.rp.retrieve(self.query)
         if len(hits) == 0:
             result = "Sorry, I couldn't find any results"
         else:
