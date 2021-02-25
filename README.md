@@ -1,4 +1,6 @@
-# Multi-stage Conversational Passage Retrieval: An Approach to Fusing Term Importance Estimation and Neural Query Rewriting
+# Chatty Goose
+
+## Multi-stage Conversational Passage Retrieval: An Approach to Fusing Term Importance Estimation and Neural Query Rewriting
 
 ---
 
@@ -34,10 +36,10 @@ searcher = SimpleSearcher("PATH_TO_INDEX")
 searcher.set_bm25(0.82, 0.68)
 ```
 
-Next, initialize one or more first-stage retrievers
+Next, initialize one or more first-stage CQR retrievers
 
 ```
-from chatty_goose.retrievers import HQE, T5_NTR
+from chatty_goose.cqr import HQE, T5_NTR
 from chatty_goose.settings import HQESettings, T5Settings
 
 hqe = HQE(searcher, HQESettings())
@@ -52,15 +54,15 @@ from chatty_goose.util import build_bert_reranker
 reranker = build_bert_reranker()
 ```
 
-Create a new CQR object
+Create a new `RetrievalPipeline`
 
 ```
-from chatty_goose.cqr import CQR
+from chatty_goose.pipeline import RetrievalPipeline
 
-cqr = CQR(searcher, [hqe, t5], searcher_num_hits=10, reranker=reranker)
+rp = RetrievalPipeline(searcher, [hqe, t5], searcher_num_hits=10, reranker=reranker)
 ```
 
-And we're done! Simply call `cqr.retrieve(query)` to retrieve passages, or call `cqr.reset_history()` to reset the conversational history of the retrievers.
+And we're done! Simply call `rp.retrieve(query)` to retrieve passages, or call `rp.reset_history()` to reset the conversational history of the retrievers.
 
 ## Running Experiments
 

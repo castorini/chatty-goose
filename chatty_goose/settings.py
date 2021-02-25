@@ -17,11 +17,11 @@ class SearcherSettings(BaseSettings):
     original_query_weight: float = 0.8  # RM3 weigh to assign initial query
 
 
-class RetrieverSettings(BaseSettings):
+class CQRSettings(BaseSettings):
     verbose: bool = False
 
 
-class HQESettings(RetrieverSettings):
+class HQESettings(CQRSettings):
     """Settings for HQE with defaults tuned on CAsT"""
 
     M: int = 5  # number of aggregate historical queries
@@ -31,7 +31,7 @@ class HQESettings(RetrieverSettings):
     filter: PosFilter = PosFilter.POS  # 'no' or 'pos' or 'stp'
 
 
-class T5Settings(RetrieverSettings):
+class T5Settings(CQRSettings):
     """Settings for T5 model for NTR"""
 
     model_name: str = "castorini/t5-base-canard"

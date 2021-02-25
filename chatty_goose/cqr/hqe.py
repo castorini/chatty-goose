@@ -6,7 +6,7 @@ import spacy
 from chatty_goose.settings import HQESettings
 from pyserini.search import SimpleSearcher
 
-from .retriever import Retriever
+from .cqr import CQR
 
 __all__ = ["HQE"]
 
@@ -15,7 +15,7 @@ nlp.pipeline = [nlp.pipeline[0]]
 STOP_WORDS = nlp.Defaults.stop_words
 
 
-class HQE(Retriever):
+class HQE(CQR):
     """Historical Query Expansion for conversational query reformulation"""
 
     def __init__(self, searcher: SimpleSearcher, settings: HQESettings = HQESettings()):

@@ -6,12 +6,12 @@ from chatty_goose.settings import T5Settings
 from spacy.lang.en import English
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
-from .retriever import Retriever
+from .cqr import CQR
 
 __all__ = ["T5_NTR"]
 
 
-class T5_NTR(Retriever):
+class T5_NTR(CQR):
     """Neural Transfer Reformulation using a trained T5 model"""
 
     def __init__(self, settings: T5Settings = T5Settings(), device: str = None):
