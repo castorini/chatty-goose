@@ -15,27 +15,22 @@ SimpleSearcher.from_prebuilt_index('cast2019')
 
 ## Run CQR retrieval
 
-The following command is for HQE, but you can also run `experiments.retrieve_with_t5` and `experiments.retrieve_with_fusion` for the corresponding experiments.
+The following command is for HQE, but you can also run other CQR methods using `t5` or `fusion` instead of `hqe` as the input to the `--experiment` flag.
 
 ```shell=bash
-python -m experiments.retrieve_with_hqe \
+python -m experiments.run_retrieval \
+      --experiment hqe \
       --hits 1000 \
       --index $anserini_index_path \
       --qid_queries $input_query_json \
       --output ./output/hqe_bm25 \
 ```
 
-Running the experiment will output the retrieval results at the specified location in TSV format. By default, this will perform retrieval using only BM25, but you can add the `--rerank` flag to further rerank these results using BERT.
+Running the experiment will output the retrieval results at the specified location in TSV format. By default, this will perform retrieval using only BM25, but you can add the `--rerank` flag to further rerank these results using BERT. For other command line arguments, see [run_retrieval.py](experiments/run_retrieval.py).
 
 ## Evaluate CQR results
 
-Remove query-document pairs with zero relevance from the answer file.
-
-```shell=bash
-awk -F " " '{if ($4>0) print($1 " " $2 " " $3 " " $4)}' $answer_file_path > ./output/answer_file
-```
-
-Finally, we convert the TSV file to TREC format and use the TREC tool to evaluate the resuls in terms of Recall@1000, mAP and NDCG@1,3.
+Convert the TSV file from above to TREC format and use the TREC tool to evaluate the resuls in terms of Recall@1000, mAP and NDCG@1,3.
 
 ```shell=bash
 python $path_to_anserini/tools/scripts/msmarco/convert_msmarco_to_trec_run.py \
@@ -50,25 +45,11 @@ $path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
 
 ## Evaluation results
 
-The results of the eval set are slightly different from the numbers reported in the paper due to slight implementation differences from Huggingface and SpaCy versions.
+Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions.
 
-| HQE + BM25  |  Eval  |
-| ----------- | :----: |
-| mAP         | 0.2105 |
-| Recall@1000 | 0.7306 |
-| NDCG@1      | 0.2640 |
-| NDCG@3      | 0.2606 |
-
-| T5 + BM25   |  Eval  |
-| ----------- | :----: |
-| mAP         | 0.2236 |
-| Recall@1000 | 0.7383 |
-| NDCG@1      | 0.2813 |
-| NDCG@3      | 0.2922 |
-
-| Fusion + BM25 |  Eval  |
-| --------------| :----: |
-| mAP           | 0.3454 |
-| Recall@1000   | 0.7383 |
-| NDCG@1        | 0.5284 |
-| NDCG@3        | 0.5216 |
+|             | HQE BM25 | HQE BM25 + BERT | T5 BM25 | T5 BM25 + BERT | Fusion BM25 | Fusion BM25 + BERT |
+| ----------- | :------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
+| mAP         |  0.2109  |     0.3058      | 0.2250  |     0.3555     |   0.2575    |                    |
+| Recall@1000 |  0.7322  |     0.7322      | 0.7392  |     0.7392     |   0.8028    |                    |
+| NDCG@1      |  0.2640  |     0.4745      | 0.2842  |     0.5751     |   0.3353    |                    |
+| NDCG@3      |  0.2606  |     0.4798      | 0.2954  |     0.5464     |   0.3236    |                    |
