@@ -36,7 +36,7 @@ class RetrievalPipeline:
     ):
         self.searcher = searcher
         self.retrievers = retrievers
-        self.searcher_num_hits = searcher_num_hits
+        self.searcher_num_hits = int(searcher_num_hits)
         self.early_fusion = early_fusion
         self.reranker = reranker
         self.reranker_query_index = reranker_query_index
@@ -47,7 +47,7 @@ class RetrievalPipeline:
         retriever_queries = []
         for retriever in self.retrievers:
             new_query = retriever.rewrite(query)
-            hits = self.searcher.search(new_query, k=int(self.searcher_num_hits))
+            hits = self.searcher.search(new_query, k=self.searcher_num_hits)
             retriever_hits.append(hits)
             retriever_queries.append(new_query)
 
@@ -67,7 +67,7 @@ class RetrievalPipeline:
 
         # Rerank results
         if self.early_fusion:
-            results = self.rerank(rerank_query, retriever_hits)
+            results = self.rerank(rerank_query, retriever_hits[:self.searcher_num_hits])
         else:
             # Rerank all retriever results and fuse together
             results = []
