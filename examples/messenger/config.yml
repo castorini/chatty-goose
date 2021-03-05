@@ -1,0 +1,18 @@
+tasks:
+  default:
+    onboard_world: ChattyGooeMessengerOnboardWorld
+    task_world: ChattyGooseMessengerTaskWorld
+    timeout: 180
+    agents_required: 1
+task_name: chatbot
+world_module: examples.messenger.worlds
+overworld: ChattyGooseMessengerOverworld
+max_workers: 30
+opt:
+  debug: True
+  password: ChattyGoose
+  models:
+    chatty_goose:
+      model: chatty_goose.agents.cqragent:ChattyGooseAgent
+additional_args:
+  page_id: ChattyGooseIR # Configure for custom page
