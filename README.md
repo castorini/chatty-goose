@@ -77,3 +77,19 @@ pip install -r requirements.txt
 ```
 
 4. Follow the instructions under [docs/cqr_experiments.md](docs/cqr_experiments.md) to run experiments using HQE, T5, or fusion.
+
+## Example Agent
+
+To run an interactive conversational search agent with ParlAI, simply run [`cqragent.py`](chatty_goose/agents/cqragent.py). By default, we use the CAsT 2019 pre-built Pyserini index, but it is possible to specify other indexes using the `--from_prebuilt` flag. See the file for other possible arguments:
+
+```
+python -m chatty_goose.agents.cqragent
+```
+
+Alternatively, run the agent using ParlAI's command line interface:
+
+```
+python -m parlai interactive --model chatty_goose.agents.cqragent:ChattyGooseAgent
+```
+
+We also provide instructions to deploy the agent to Facebook Messenger using ParlAI under [`examples/messenger`](examples/messenger/README.md).

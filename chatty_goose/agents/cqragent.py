@@ -8,12 +8,12 @@ from parlai.core.agents import Agent, register_agent
 from pyserini.search import SimpleSearcher
 
 
-@register_agent("ConversationalSearcher")
-class ConversationSearchAgent(Agent):
+@register_agent("ChattyGooseAgent")
+class ChattyGooseAgent(Agent):
     @classmethod
     def add_cmdline_args(cls, parser, partial_opt = None):
         parser.add_argument('--name', type=str, default='CQR', help="The agent's name.")
-        parser.add_argument('--cqr_type', type=str, default='t5', help="hqe, t5, or fusion")
+        parser.add_argument('--cqr_type', type=str, default='fusion', help="hqe, t5, or fusion")
         parser.add_argument('--episode_done', type=str, default='[END]', help="end signal for interactive mode")
         parser.add_argument('--hits', type=int, default=10, help="number of hits to retrieve from searcher")
 
@@ -87,4 +87,4 @@ class ConversationSearchAgent(Agent):
 if __name__ == "__main__":
     from parlai.scripts.interactive import Interactive
 
-    Interactive.main(model="ConversationalSearcher", cqr_type="fusion")
+    Interactive.main(model="ChattyGooseAgent", cqr_type="fusion")
