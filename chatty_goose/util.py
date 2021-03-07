@@ -1,4 +1,5 @@
 import logging
+from os import path
 from typing import Dict, List, Tuple
 
 from pygaggle.rerank.transformer import MonoBERT
@@ -49,7 +50,10 @@ def build_bert_reranker(
 
 
 def build_searcher(settings: SearcherSettings) -> SimpleSearcher:
-    searcher = SimpleSearcher(settings.index_path)
+    if path.isdir(settings.index_path):
+        searcher = SimpleSearcher(settings.index_path)
+    else:
+        searcher = SimpleSearcher.from_prebuilt_index(settings.index_path)
     searcher.set_bm25(float(settings.k1), float(settings.b))
     logging.info(
         "Initializing BM25, setting k1={} and b={}".format(settings.k1, settings.b)

@@ -116,9 +116,9 @@ if __name__ == "__main__":
     )
     searcher = build_searcher(searcher_settings)
 
-    # Initialize retrievers and reranker
-    retrievers = []
-    reranker_query_retriever = None
+    # Initialize CQR and reranker
+    reformulators = []
+    reranker_query_reformulator = None
     reranker = build_bert_reranker(device=args.reranker_device) if args.rerank else None
 
     if experiment == CQRType.HQE or experiment == CQRType.FUSION:
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             verbose=args.verbose,
         )
         hqe_bm25 = HQE(searcher, hqe_bm25_settings)
-        retrievers.append(hqe_bm25)
+        reformulators.append(hqe_bm25)
 
     if experiment == CQRType.T5 or experiment == CQRType.FUSION:
         # Initialize T5
@@ -143,7 +143,7 @@ if __name__ == "__main__":
             verbose=args.verbose,
         )
         t5 = T5_NTR(t5_settings, device=args.t5_device)
-        retrievers.append(t5)
+        reformulators.append(t5)
 
     if experiment == CQRType.HQE:
         hqe_bert_settings = HQESettings(
@@ -153,14 +153,14 @@ if __name__ == "__main__":
             R_sub=args.R1_sub,
             filter=PosFilter(args.filter),
         )
-        reranker_query_retriever = HQE(searcher, hqe_bert_settings)
+        reranker_query_reformulator = HQE(searcher, hqe_bert_settings)
 
     rp = RetrievalPipeline(
         searcher,
-        retrievers,
+        reformulators,
         searcher_num_hits=args.hits,
         early_fusion=not args.late_fusion,
         reranker=reranker,
-        reranker_query_retriever=reranker_query_retriever,
+        reranker_query_reformulator=reranker_query_reformulator,
     )
     run_experiment(rp)
