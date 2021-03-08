@@ -9,7 +9,7 @@
 
 ## Installation
 
-1. Make sure Java 11+ and Python 3.6+ are installed
+1. Make sure Java 11+ and **Python 3.7+** are installed
 
 2. Install the `chatty-goose` PyPI module
 
@@ -17,7 +17,13 @@
 pip install chatty-goose
 ```
 
-3. If you are using T5 or BERT, make sure to install [PyTorch 1.5+](https://pytorch.org/) using your specific platform instructions
+3. If you are using T5 or BERT, make sure to install [PyTorch 1.4.0 - 1.7.1](https://pytorch.org/) using your specific platform instructions. Note that PyTorch 1.8 is currently incompatible due to the `transformers` version we currently use. Also make sure to install the corresponding [torchtext](https://pypi.org/project/torchtext/) version.
+
+4. Download the English model for spaCy
+
+```
+python -m spacy download en_core_web_sm
+```
 
 ## Quickstart Guide
 
