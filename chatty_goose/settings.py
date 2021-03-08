@@ -8,7 +8,7 @@ __all__ = ["SearcherSettings", "HQESettings", "T5Settings"]
 class SearcherSettings(BaseSettings):
     """Settings for Anserini searcher"""
 
-    index_path: str  # Lucene index path
+    index_path: str  # Pre-built index name or path to Lucene index 
     k1: float = 0.82  # BM25 k parameter
     b: float = 0.68  # BM25 b parameter
     rm3: bool = False  # use RM3

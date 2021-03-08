@@ -9,7 +9,7 @@ This guide is based on ParlAI's [chat service tutorial](https://parl.ai/docs/tut
 3. Run the webhook server and Chatty Goose agent using our provided configuration. This assumes you have the ParlAI Python package installed and are inside the `chatty-goose` root repository folder.
 
 ```
-python3.7 -m parlai.chat_service.services.messenger.run --config-path examples/messenger/config.yml
+python -m parlai.chat_service.services.messenger.run --config-path examples/messenger/config.yml
 ```
 
 4. Add the webhook URL outputted from the above command as a callback URL for the Messenger App settings, and set the verify token to `Messenger4ParlAI`. For Heroku, this URL should look like `https://firstname-parlai-messenger-chatbot.herokuapp.com/webhook`.

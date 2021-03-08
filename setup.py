@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-excluded = ["data*", "experiments*"]
+excluded = ["data*", "examples*", "experiments*"]
 
 
 setuptools.setup(
@@ -17,7 +17,7 @@ setuptools.setup(
     description="A conversational passage retrieval toolkit",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/jacklin64/chatty-goose",
+    url="https://github.com/castorini/chatty-goose",
     install_requires=requirements,
     packages=setuptools.find_packages(exclude=excluded),
     classifiers=[

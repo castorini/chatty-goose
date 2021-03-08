@@ -15,63 +15,63 @@ class RetrievalPipeline:
     
     Parameters:
         searcher (SimpleSearcher): Pyserini searcher for Lucene index
-        retrievers (List[CQR]): List of CQR retrievers to use for first-stage retrieval
+        reformulators (List[CQR]): List of CQR methods to use for first-stage retrieval
         searcher_num_hits (int): number of hits returned by searcher - default 10
         early_fusion (bool): flag to perform fusion before second-stage retrieval - default True
         reranker (Reranker): optional reranker for second-stage retrieval
         reranker_query_index (int): retriever index to use for reranking query - defaults to last retriever
-        reranker_query_retriever (CQR): retriever for generating reranker query,
-                                        overrides reranker_query_index if provided
+        reranker_query_reformulator (CQR): CQR method for generating reranker query,
+                                           overrides reranker_query_index if provided
     """
 
     def __init__(
         self,
         searcher: SimpleSearcher,
-        retrievers: List[CQR],
+        reformulators: List[CQR],
         searcher_num_hits: int = 10,
         early_fusion: bool = True,
         reranker: Reranker = None,
         reranker_query_index: int = -1,
-        reranker_query_retriever: CQR = None,
+        reranker_query_reformulator: CQR = None,
     ):
         self.searcher = searcher
-        self.retrievers = retrievers
+        self.reformulators = reformulators
         self.searcher_num_hits = int(searcher_num_hits)
         self.early_fusion = early_fusion
         self.reranker = reranker
         self.reranker_query_index = reranker_query_index
-        self.reranker_query_retriever = reranker_query_retriever
+        self.reranker_query_reformulator = reranker_query_reformulator
 
     def retrieve(self, query) -> List[JSimpleSearcherResult]:
-        retriever_hits = []
-        retriever_queries = []
-        for retriever in self.retrievers:
-            new_query = retriever.rewrite(query)
+        cqr_hits = []
+        cqr_queries = []
+        for cqr in self.reformulators:
+            new_query = cqr.rewrite(query)
             hits = self.searcher.search(new_query, k=self.searcher_num_hits)
-            retriever_hits.append(hits)
-            retriever_queries.append(new_query)
+            cqr_hits.append(hits)
+            cqr_queries.append(new_query)
 
-        # Merge results from multiple retrievers if required
+        # Merge results from multiple CQR methods if required
         if self.early_fusion or self.reranker is None:
-            retriever_hits = reciprocal_rank_fusion(retriever_hits)
+            cqr_hits = reciprocal_rank_fusion(cqr_hits)
 
         # Return results if no reranker
         if self.reranker is None:
-            return retriever_hits
+            return cqr_hits
 
         # Get query for reranker
-        if self.reranker_query_retriever is None:
-            rerank_query = retriever_queries[self.reranker_query_index]
+        if self.reranker_query_reformulator is None:
+            rerank_query = cqr_queries[self.reranker_query_index]
         else:
-            rerank_query = self.reranker_query_retriever.rewrite(query)
+            rerank_query = self.reranker_query_reformulator.rewrite(query)
 
         # Rerank results
         if self.early_fusion:
-            results = self.rerank(rerank_query, retriever_hits[:self.searcher_num_hits])
+            results = self.rerank(rerank_query, cqr_hits[:self.searcher_num_hits])
         else:
-            # Rerank all retriever results and fuse together
+            # Rerank all CQR results and fuse together
             results = []
-            for hits in retriever_hits:
+            for hits in cqr_hits:
                 results = self.rerank(rerank_query, hits)
             results = reciprocal_rank_fusion(results)
         return results
@@ -91,8 +91,8 @@ class RetrievalPipeline:
         return reranked_hits
 
     def reset_history(self):
-        for retriever in self.retrievers:
-            retriever.reset_history()
+        for cqr in self.reformulators:
+            cqr.reset_history()
 
-        if self.reranker_query_retriever:
-            self.reranker_query_retriever.reset_history()
+        if self.reranker_query_reformulator:
+            self.reranker_query_reformulator.reset_history()
