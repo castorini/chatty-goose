@@ -38,7 +38,7 @@ $path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
 
 ## Evaluation results
 
-Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions.
+Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`.
 
 |             | HQE BM25 | HQE BM25 + BERT | T5 BM25 | T5 BM25 + BERT | Fusion BM25 | Fusion BM25 + BERT |
 | ----------- | :------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
