@@ -10,8 +10,7 @@ from .cqr import CQR
 
 __all__ = ["HQE"]
 
-nlp = spacy.load("en_core_web_sm", parser=False, ner=False, textcat=False)
-nlp.pipeline = [nlp.pipeline[0]]
+nlp = spacy.load("en_core_web_sm")
 STOP_WORDS = nlp.Defaults.stop_words
 
 
@@ -39,7 +38,8 @@ class HQE(CQR):
         self.key_word_extraction(query)
         if self.turn_id != 0:
             hits = self.searcher.search(query, 1)
-            key_word = self.query_expansion(self.key_word_list, 0, self.turn_id)
+            key_word = self.query_expansion(
+                self.key_word_list, 0, self.turn_id)
             subkey_word = ""
             if len(hits) == 0 or hits[0].score <= self.eta:
                 end_turn = self.turn_id + 1

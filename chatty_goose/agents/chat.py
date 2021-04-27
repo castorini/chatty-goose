@@ -15,7 +15,7 @@ class ChattyGooseAgent(Agent):
         parser.add_argument('--name', type=str, default='CQR', help="The agent's name.")
         parser.add_argument('--cqr_type', type=str, default='fusion', help="hqe, t5, or fusion")
         parser.add_argument('--episode_done', type=str, default='[END]', help="end signal for interactive mode")
-        parser.add_argument('--hits', type=int, default=10, help="number of hits to retrieve from searcher")
+        parser.add_argument('--hits', type=int, default=50, help="number of hits to retrieve from searcher")
 
         # Pyserini
         parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')

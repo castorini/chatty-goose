@@ -13,6 +13,6 @@ opt:
   password: ChattyGoose
   models:
     chatty_goose:
-      model: chatty_goose.agents.cqragent:ChattyGooseAgent
+      model: chatty_goose.agents.chat:ChattyGooseAgent
 additional_args:
   page_id: ChattyGooseIR # Configure for custom page

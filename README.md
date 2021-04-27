@@ -27,7 +27,7 @@ python -m spacy download en_core_web_sm
 
 ## Quickstart Guide
 
-The following example shows how to initialize a searcher and build a CQR agent from scratch using HQE and T5 as first-stage retrievers, and a BERT reranker. To see a working example agent, see [chatty_goose/agents/cqragent.py](chatty_goose/agents/cqragent.py).
+The following example shows how to initialize a searcher and build a CQR agent from scratch using HQE and T5 as first-stage retrievers, and a BERT reranker. To see a working example agent, see [chatty_goose/agents/chat.py](chatty_goose/agents/chat.py).
 
 First, load a searcher
 
@@ -86,16 +86,16 @@ pip install -r requirements.txt
 
 ## Example Agent
 
-To run an interactive conversational search agent with ParlAI, simply run [`cqragent.py`](chatty_goose/agents/cqragent.py). By default, we use the CAsT 2019 pre-built Pyserini index, but it is possible to specify other indexes using the `--from_prebuilt` flag. See the file for other possible arguments:
+To run an interactive conversational search agent with ParlAI, simply run [`chat.py`](chatty_goose/agents/chat.py). By default, we use the CAsT 2019 pre-built Pyserini index, but it is possible to specify other indexes using the `--from_prebuilt` flag. See the file for other possible arguments:
 
 ```
-python -m chatty_goose.agents.cqragent
+python -m chatty_goose.agents.chat
 ```
 
 Alternatively, run the agent using ParlAI's command line interface:
 
 ```
-python -m parlai interactive --model chatty_goose.agents.cqragent:ChattyGooseAgent
+python -m parlai interactive --model chatty_goose.agents.chat:ChattyGooseAgent
 ```
 
 We also provide instructions to deploy the agent to Facebook Messenger using ParlAI under [`examples/messenger`](examples/messenger/README.md).
