@@ -2,20 +2,20 @@ import logging
 import time
 import torch
 
-from chatty_goose.settings import T5Settings
+from chatty_goose.settings import NtrSettings
 from spacy.lang.en import English
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
-from .cqr import CQR
+from .cqr import ConversationalQueryRewriter
 
-__all__ = ["T5_NTR"]
+__all__ = ["Ntr"]
 
 
-class T5_NTR(CQR):
+class Ntr(ConversationalQueryRewriter):
     """Neural Transfer Reformulation using a trained T5 model"""
 
-    def __init__(self, settings: T5Settings = T5Settings(), device: str = None):
-        super().__init__("T5", verbose=settings.verbose)
+    def __init__(self, settings: NtrSettings = NtrSettings(), device: str = None):
+        super().__init__("Ntr", verbose=settings.verbose)
 
         # Model settings
         self.max_length = settings.max_length

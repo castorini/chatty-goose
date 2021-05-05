@@ -2,10 +2,10 @@ import argparse
 import json
 import time
 
-from chatty_goose.cqr import HQE, T5_NTR
+from chatty_goose.cqr import Hqe, Ntr
 from chatty_goose.pipeline import RetrievalPipeline
-from chatty_goose.settings import HQESettings, SearcherSettings, T5Settings
-from chatty_goose.types import CQRType, PosFilter
+from chatty_goose.settings import HqeSettings, SearcherSettings, NtrSettings
+from chatty_goose.types import CqrType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
 
 
@@ -103,7 +103,7 @@ def run_experiment(rp: RetrievalPipeline):
 
 if __name__ == "__main__":
     args = parse_experiment_args()
-    experiment = CQRType(args.experiment)
+    experiment = CqrType(args.experiment)
 
     searcher_settings = SearcherSettings(
         index_path=args.index,
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     reranker_query_reformulator = None
     reranker = build_bert_reranker(device=args.reranker_device) if args.rerank else None
 
-    if experiment == CQRType.HQE or experiment == CQRType.FUSION:
-        hqe_bm25_settings = HQESettings(
+    if experiment == CqrType.HQE or experiment == CqrType.FUSION:
+        hqe_bm25_settings = HqeSettings(
             M=args.M0,
             eta=args.eta0,
             R_topic=args.R0_topic,
@@ -130,30 +130,30 @@ if __name__ == "__main__":
             filter=PosFilter(args.filter),
             verbose=args.verbose,
         )
-        hqe_bm25 = HQE(searcher, hqe_bm25_settings)
+        hqe_bm25 = Hqe(searcher, hqe_bm25_settings)
         reformulators.append(hqe_bm25)
 
-    if experiment == CQRType.T5 or experiment == CQRType.FUSION:
-        # Initialize T5
-        t5_settings = T5Settings(
+    if experiment == CqrType.T5 or experiment == CqrType.FUSION:
+        # Initialize T5 NTR
+        t5_settings = NtrSettings(
             model_name=args.t5_model_name,
             max_length=args.max_length,
             num_beams=args.num_beams,
             early_stopping=not args.no_early_stopping,
             verbose=args.verbose,
         )
-        t5 = T5_NTR(t5_settings, device=args.t5_device)
+        t5 = Ntr(t5_settings, device=args.t5_device)
         reformulators.append(t5)
 
-    if experiment == CQRType.HQE:
-        hqe_bert_settings = HQESettings(
+    if experiment == CqrType.HQE:
+        hqe_bert_settings = HqeSettings(
             M=args.M1,
             eta=args.eta1,
             R_topic=args.R1_topic,
             R_sub=args.R1_sub,
             filter=PosFilter(args.filter),
         )
-        reranker_query_reformulator = HQE(searcher, hqe_bert_settings)
+        reranker_query_reformulator = Hqe(searcher, hqe_bert_settings)
 
     rp = RetrievalPipeline(
         searcher,

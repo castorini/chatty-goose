@@ -1,6 +1,6 @@
 tasks:
   default:
-    onboard_world: ChattyGooeMessengerOnboardWorld
+    onboard_world: ChattyGooseMessengerOnboardWorld
     task_world: ChattyGooseMessengerTaskWorld
     timeout: 180
     agents_required: 1

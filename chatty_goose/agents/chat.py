@@ -1,9 +1,9 @@
 import logging
 
-from chatty_goose.cqr import HQE, T5_NTR
+from chatty_goose.cqr import Hqe, Ntr
 from chatty_goose.pipeline import RetrievalPipeline
-from chatty_goose.settings import HQESettings, T5Settings
-from chatty_goose.types import CQRType, PosFilter
+from chatty_goose.settings import HqeSettings, NtrSettings
+from chatty_goose.types import CqrType, PosFilter
 from parlai.core.agents import Agent, register_agent
 from pyserini.search import SimpleSearcher
 
@@ -38,7 +38,7 @@ class ChattyGooseAgent(Agent):
         super().__init__(opt, shared)
         self.name = opt["name"]
         self.episode_done = opt["episode_done"]
-        self.cqr_type = CQRType(opt["cqr_type"])
+        self.cqr_type = CqrType(opt["cqr_type"])
 
         # Initialize searcher
         searcher = SimpleSearcher.from_prebuilt_index(opt["from_prebuilt"])
@@ -46,8 +46,8 @@ class ChattyGooseAgent(Agent):
 
         # Initialize retrievers
         retrievers = []
-        if self.cqr_type == CQRType.HQE or self.cqr_type == CQRType.FUSION:
-            hqe_settings = HQESettings(
+        if self.cqr_type == CqrType.HQE or self.cqr_type == CqrType.FUSION:
+            hqe_settings = HqeSettings(
                 M=opt["M"],
                 eta=opt["eta"],
                 R_topic=opt["R_topic"],
@@ -55,11 +55,11 @@ class ChattyGooseAgent(Agent):
                 filter=PosFilter(opt["filter"]),
                 verbose=opt["verbose"],
             )
-            hqe = HQE(searcher, hqe_settings)
+            hqe = Hqe(searcher, hqe_settings)
             retrievers.append(hqe)
-        if self.cqr_type == CQRType.T5 or self.cqr_type == CQRType.FUSION:
-            t5_settings = T5Settings(model_name=opt["from_pretrained"], verbose=opt["verbose"])
-            t5 = T5_NTR(t5_settings)
+        if self.cqr_type == CqrType.T5 or self.cqr_type == CqrType.FUSION:
+            t5_settings = NtrSettings(model_name=opt["from_pretrained"], verbose=opt["verbose"])
+            t5 = Ntr(t5_settings)
             retrievers.append(t5)
 
         self.rp = RetrievalPipeline(searcher, retrievers, int(opt["hits"]))

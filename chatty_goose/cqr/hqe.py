@@ -3,22 +3,22 @@ import re
 import time
 
 import spacy
-from chatty_goose.settings import HQESettings
+from chatty_goose.settings import HqeSettings
 from pyserini.search import SimpleSearcher
 
-from .cqr import CQR
+from .cqr import ConversationalQueryRewriter
 
-__all__ = ["HQE"]
+__all__ = ["Hqe"]
 
 nlp = spacy.load("en_core_web_sm")
 STOP_WORDS = nlp.Defaults.stop_words
 
 
-class HQE(CQR):
+class Hqe(ConversationalQueryRewriter):
     """Historical Query Expansion for conversational query reformulation"""
 
-    def __init__(self, searcher: SimpleSearcher, settings: HQESettings = HQESettings()):
-        super().__init__("HQE", verbose=settings.verbose)
+    def __init__(self, searcher: SimpleSearcher, settings: HqeSettings = HqeSettings()):
+        super().__init__("Hqe", verbose=settings.verbose)
 
         # Model settings
         self.M = settings.M

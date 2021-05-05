@@ -2,13 +2,13 @@ from pydantic import BaseSettings
 
 from chatty_goose.types import PosFilter
 
-__all__ = ["SearcherSettings", "HQESettings", "T5Settings"]
+__all__ = ["SearcherSettings", "HqeSettings", "NtrSettings"]
 
 
 class SearcherSettings(BaseSettings):
     """Settings for Anserini searcher"""
 
-    index_path: str  # Pre-built index name or path to Lucene index 
+    index_path: str  # Pre-built index name or path to Lucene index
     k1: float = 0.82  # BM25 k parameter
     b: float = 0.68  # BM25 b parameter
     rm3: bool = False  # use RM3
@@ -17,11 +17,11 @@ class SearcherSettings(BaseSettings):
     original_query_weight: float = 0.8  # RM3 weigh to assign initial query
 
 
-class CQRSettings(BaseSettings):
+class CqrSettings(BaseSettings):
     verbose: bool = False
 
 
-class HQESettings(CQRSettings):
+class HqeSettings(CqrSettings):
     """Settings for HQE with defaults tuned on CAsT"""
 
     M: int = 5  # number of aggregate historical queries
@@ -31,7 +31,7 @@ class HQESettings(CQRSettings):
     filter: PosFilter = PosFilter.POS  # 'no' or 'pos' or 'stp'
 
 
-class T5Settings(CQRSettings):
+class NtrSettings(CqrSettings):
     """Settings for T5 model for NTR"""
 
     model_name: str = "castorini/t5-base-canard"

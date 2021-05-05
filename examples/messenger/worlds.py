@@ -3,14 +3,14 @@ from parlai.chat_service.services.messenger.worlds import OnboardWorld
 from parlai.core.agents import create_agent_from_shared
 
 
-class ChattyGooeMessengerOnboardWorld(OnboardWorld):
+class ChattyGooseMessengerOnboardWorld(OnboardWorld):
     """
     Example messenger onboarding world for Chatty Goose.
     """
 
     @staticmethod
     def generate_world(opt, agents):
-        return ChattyGooeMessengerOnboardWorld(opt=opt, agent=agents[0])
+        return ChattyGooseMessengerOnboardWorld(opt=opt, agent=agents[0])
 
     def parley(self):
         self.episodeDone = True
@@ -61,10 +61,13 @@ class ChattyGooseMessengerTaskWorld(World):
                 self.episodeDone = True
             elif '[RESET]' in a['text']:
                 self.model.reset()
-                self.agent.observe({"text": "[History Cleared]", "episode_done": False})
+                self.agent.observe(
+                    {"text": "[History Cleared]", "episode_done": False})
             else:
                 self.model.observe(a)
                 response = self.model.act()
+                # Make sure prefix from agent is not displayed
+                response.force_set('id', '')
                 self.agent.observe(response)
 
     def episode_done(self):
