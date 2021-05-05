@@ -3,23 +3,22 @@ import re
 import time
 
 import spacy
-from chatty_goose.settings import HQESettings
+from chatty_goose.settings import HqeSettings
 from pyserini.search import SimpleSearcher
 
-from .cqr import CQR
+from .cqr import ConversationalQueryRewriter
 
-__all__ = ["HQE"]
+__all__ = ["Hqe"]
 
-nlp = spacy.load("en_core_web_sm", parser=False, ner=False, textcat=False)
-nlp.pipeline = [nlp.pipeline[0]]
+nlp = spacy.load("en_core_web_sm")
 STOP_WORDS = nlp.Defaults.stop_words
 
 
-class HQE(CQR):
+class Hqe(ConversationalQueryRewriter):
     """Historical Query Expansion for conversational query reformulation"""
 
-    def __init__(self, searcher: SimpleSearcher, settings: HQESettings = HQESettings()):
-        super().__init__("HQE", verbose=settings.verbose)
+    def __init__(self, searcher: SimpleSearcher, settings: HqeSettings = HqeSettings()):
+        super().__init__("Hqe", verbose=settings.verbose)
 
         # Model settings
         self.M = settings.M
@@ -39,7 +38,8 @@ class HQE(CQR):
         self.key_word_extraction(query)
         if self.turn_id != 0:
             hits = self.searcher.search(query, 1)
-            key_word = self.query_expansion(self.key_word_list, 0, self.turn_id)
+            key_word = self.query_expansion(
+                self.key_word_list, 0, self.turn_id)
             subkey_word = ""
             if len(hits) == 0 or hits[0].score <= self.eta:
                 end_turn = self.turn_id + 1

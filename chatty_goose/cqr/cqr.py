@@ -2,10 +2,10 @@ from abc import abstractmethod
 import logging
 
 
-__all__ = ["CQR"]
+__all__ = ["ConversationalQueryRewriter"]
 
 
-class CQR:
+class ConversationalQueryRewriter:
     """Base conversational query reformulation class"""
     def __init__(self, name: str, verbose: bool = False):
         self.name = name

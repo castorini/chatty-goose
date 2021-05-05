@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from chatty_goose.cqr import CQR
+from chatty_goose.cqr import ConversationalQueryRewriter
 from chatty_goose.util import reciprocal_rank_fusion
 from pygaggle.rerank.base import Query, Reranker, hits_to_texts
 from pyserini.search import JSimpleSearcherResult, SimpleSearcher
@@ -12,27 +12,27 @@ __all__ = ["RetrievalPipeline"]
 class RetrievalPipeline:
     """
     End-to-end conversational passage retrieval pipeline
-    
+
     Parameters:
         searcher (SimpleSearcher): Pyserini searcher for Lucene index
-        reformulators (List[CQR]): List of CQR methods to use for first-stage retrieval
+        reformulators (List[ConversationalQueryRewriter]): List of CQR methods to use for first-stage retrieval
         searcher_num_hits (int): number of hits returned by searcher - default 10
         early_fusion (bool): flag to perform fusion before second-stage retrieval - default True
         reranker (Reranker): optional reranker for second-stage retrieval
         reranker_query_index (int): retriever index to use for reranking query - defaults to last retriever
-        reranker_query_reformulator (CQR): CQR method for generating reranker query,
-                                           overrides reranker_query_index if provided
+        reranker_query_reformulator (ConversationalQueryRewriter): CQR method for generating reranker query,
+                                                                   overrides reranker_query_index if provided
     """
 
     def __init__(
         self,
         searcher: SimpleSearcher,
-        reformulators: List[CQR],
+        reformulators: List[ConversationalQueryRewriter],
         searcher_num_hits: int = 10,
         early_fusion: bool = True,
         reranker: Reranker = None,
         reranker_query_index: int = -1,
-        reranker_query_reformulator: CQR = None,
+        reranker_query_reformulator: ConversationalQueryRewriter = None,
     ):
         self.searcher = searcher
         self.reformulators = reformulators
@@ -67,7 +67,8 @@ class RetrievalPipeline:
 
         # Rerank results
         if self.early_fusion:
-            results = self.rerank(rerank_query, cqr_hits[:self.searcher_num_hits])
+            results = self.rerank(
+                rerank_query, cqr_hits[:self.searcher_num_hits])
         else:
             # Rerank all CQR results and fuse together
             results = []
