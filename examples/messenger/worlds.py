@@ -48,7 +48,7 @@ class ChattyGooseMessengerTaskWorld(World):
         if self.first_time:
             self.agent.observe(
                 {
-                    'id': 'World',
+                    'id': '',
                     'text': 'Welcome to the Chatty Goose demo! '
                             'Please type a query. '
                             'Type [DONE] to finish the chat, or [RESET] to reset the dialogue history.',
@@ -67,7 +67,7 @@ class ChattyGooseMessengerTaskWorld(World):
                 self.model.observe(a)
                 response = self.model.act()
                 # Make sure prefix from agent is not displayed
-                response.force_set('id', '')
+                response['id'] = ''
                 self.agent.observe(response)
 
     def episode_done(self):
