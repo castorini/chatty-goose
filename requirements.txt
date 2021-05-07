@@ -2,4 +2,4 @@ coloredlogs
 parlai==1.1.0
 pydantic>=1.5
 pygaggle==0.0.3.1
-spacy>=2.2.4
+spacy>=2.2.4,<=2.3.5

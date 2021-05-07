@@ -11,7 +11,7 @@ excluded = ["data*", "examples*", "experiments*"]
 
 setuptools.setup(
     name="chatty-goose",
-    version="0.1.0",
+    version="0.2.0",
     author="Anserini Gaggle",
     author_email="anserini.gaggle@gmail.com",
     description="A conversational passage retrieval toolkit",
