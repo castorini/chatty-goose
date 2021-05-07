@@ -46,3 +46,7 @@ Results for the CAsT 2019 evaluation dataset are provided below. The results may
 | Recall@1000 |  0.7322  |     0.7322      | 0.7392  |     0.7392     |   0.8028    |       0.8028       |
 | NDCG@1      |  0.2640  |     0.4745      | 0.2842  |     0.5751     |   0.3353    |       0.5838       |
 | NDCG@3      |  0.2606  |     0.4798      | 0.2954  |     0.5464     |   0.3247    |       0.5640       |
+
+## Reproduction Log[*](reproducibility.md)
+
++ Results reproduced by [@saileshnankani](https://github.com/saileshnankani) on 2021-05-17 (commit [`3847d15`](https://github.com/castorini/chatty-goose/commit/3847d15f3fb39a57ac061648c863798dd4510049)) (Fuson BM25)
