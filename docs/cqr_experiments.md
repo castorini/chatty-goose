@@ -4,6 +4,12 @@
 
 1. Download either the [training](https://github.com/daltonj/treccastweb/blob/master/2019/data/training/train_topics_v1.0.json) and [evaluation](https://github.com/daltonj/treccastweb/blob/master/2019/data/evaluation/evaluation_topics_v1.0.json) input query JSON files. These files can be found under `data/treccastweb/2019/data` if you cloned the submodules for this repo.
 
+pass your pathname to a variable
+default:
+```shell=bash
+export input_query_json=data/treccastweb/2019/data
+```
+
 2. Download the evaluation answer files for [training](https://github.com/daltonj/treccastweb/blob/master/2019/data/training/train_topics_mod.qrel) or [evaluation](https://trec.nist.gov/data/cast/2019qrels.txt). The training answer file is found under `data/treccastweb/2019/data`.
 
 ## Run CQR retrieval
@@ -19,7 +25,7 @@ python -m experiments.run_retrieval \
       --output ./output/hqe_bm25 \
 ```
 
-The experiment will output the retrieval results at the specified location in TSV format. By default, this will perform retrieval using only BM25, but you can add the `--rerank` flag to further rerank these results using BERT. For other command line arguments, see [run_retrieval.py](experiments/run_retrieval.py).
+The experiment will output the retrieval results at the specified location in TSV format. By default, this will perform retrieval using only BM25, but you can add the `--rerank` flag to further rerank these results using BERT. For other command line arguments, see [run_retrieval.py](https://github.com/castorini/chatty-goose/blob/master/experiments/run_retrieval.py).
 
 ## Evaluate CQR results
 
@@ -49,4 +55,5 @@ Results for the CAsT 2019 evaluation dataset are provided below. The results may
 
 ## Reproduction Log
 
-+ Results reproduced by [@saileshnankani](https://github.com/saileshnankani) on 2021-05-17 (commit [`3847d15`](https://github.com/castorini/chatty-goose/commit/3847d15f3fb39a57ac061648c863798dd4510049)) (Fuson BM25)
++ Results reproduced by [@saileshnankani](https://github.com/saileshnankani) on 2021-05-07 (commit [`3847d15`](https://github.com/castorini/chatty-goose/commit/3847d15f3fb39a57ac061648c863798dd4510049)) (Fusion BM25)
++ Results reproduced by [@ArthurChen189](https://github.com/ArthurChen189) on 2021-05-07 (commit [`ef3a271`](https://github.com/castorini/chatty-goose/commit/ef3a27119d6825a96ae85d1453d6b4eac4ed22b7)) (Fusion BM25)
