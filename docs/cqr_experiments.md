@@ -57,3 +57,4 @@ Results for the CAsT 2019 evaluation dataset are provided below. The results may
 
 + Results reproduced by [@saileshnankani](https://github.com/saileshnankani) on 2021-05-07 (commit [`3847d15`](https://github.com/castorini/chatty-goose/commit/3847d15f3fb39a57ac061648c863798dd4510049)) (Fusion BM25)
 + Results reproduced by [@ArthurChen189](https://github.com/ArthurChen189) on 2021-05-07 (commit [`ef3a271`](https://github.com/castorini/chatty-goose/commit/ef3a27119d6825a96ae85d1453d6b4eac4ed22b7)) (Fusion BM25)
++ Fusion BM25 Results reproduced by [@andrewyguo](https://github.com/andrewyguo) on 2021-05-07 (commit [`79f89dc`](https://github.com/castorini/chatty-goose/commit/79f89dcaccc9b5d6b89b3d3012b98e98548bf6c7)) 
