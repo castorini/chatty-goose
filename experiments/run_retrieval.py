@@ -8,6 +8,9 @@ from chatty_goose.settings import HqeSettings, SearcherSettings, NtrSettings
 from chatty_goose.types import CqrType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
 
+from pyserini.search import SimpleSearcher
+searcher = SimpleSearcher.from_prebuilt_index('msmarco-passage')
+
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
@@ -28,7 +31,7 @@ def parse_experiment_args():
     parser.add_argument('--fb_terms', default=10, type=int, help='RM3 parameter: number of expansion terms')
     parser.add_argument('--fb_docs', default=10, type=int, help='RM3 parameter: number of documents')
     parser.add_argument('--original_query_weight', default=0.8, type=float, help='RM3 parameter: weight to assign to the original query')
-    
+
     # Parameters for HQE. The default values are tuned on CAsT train data
     parser.add_argument('--M0', default=5, type=int, help='aggregate historcial queries for first stage (BM25) retrieval')
     parser.add_argument('--M1', default=1, type=int, help='aggregate historcial queries for second stage (BERT) retrieval')
@@ -80,6 +83,25 @@ def run_experiment(rp: RetrievalPipeline):
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
+
+                    if conversations.get("manual_canonical_result_id", None):
+                        doc = conversations["manual_canonical_result_id"].split('_')[1]
+                        if doc is None:
+                            continue
+
+                        query = json.loads(doc.raw())['contents']
+                        total_query_count += 1
+
+                        conversation_num = str(conversations["number"])
+                        qid = session_num + "_" + conversation_num
+
+                        qr_start_time = time.time()
+                        qr_total_time += time.time() - qr_start_time
+
+                        hits = rp.retrieve(query)
+                        for rank in range(len(hits)):
+                            docno = hits[rank].docid
+                            fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
 
                 rp.reset_history()
                 time_per_query = (time.time() - start_time) / (turn_id + 1)
