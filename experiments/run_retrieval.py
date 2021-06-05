@@ -9,7 +9,7 @@ from chatty_goose.types import CqrType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
 
 from pyserini.search import SimpleSearcher
-searcher = SimpleSearcher.from_prebuilt_index('msmarco-passage')
+searcher = SimpleSearcher.from_prebuilt_index('cast2019')
 
 
 def parse_experiment_args():
@@ -91,6 +91,7 @@ def run_experiment(rp: RetrievalPipeline):
                             continue
 
                         query = json.loads(doc.raw())['contents']
+                        print("query: ", query)
                         total_query_count += 1
 
                         conversation_num = str(conversations["number"])
