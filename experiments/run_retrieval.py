@@ -9,7 +9,6 @@ from chatty_goose.types import CqrType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
 
 from pyserini.search import SimpleSearcher
-searcher = SimpleSearcher.from_prebuilt_index('cast2019')
 
 
 def parse_experiment_args():
@@ -58,6 +57,7 @@ def parse_experiment_args():
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
         with open(args.output + ".doc.tsv", "w") as fout1:
+            searcher = SimpleSearcher.from_prebuilt_index('msmarco-passage')
 
             total_query_count = 0
             with open(args.qid_queries) as json_file:
@@ -91,7 +91,6 @@ def run_experiment(rp: RetrievalPipeline):
                             continue
 
                         query = json.loads(doc.raw())['contents']
-                        print("query: ", query)
                         total_query_count += 1
 
                         conversation_num = str(conversations["number"])
