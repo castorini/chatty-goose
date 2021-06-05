@@ -85,7 +85,8 @@ def run_experiment(rp: RetrievalPipeline):
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
 
                     if conversations.get("manual_canonical_result_id", None):
-                        doc = conversations["manual_canonical_result_id"].split('_')[1]
+                        doc_id = conversations["manual_canonical_result_id"].split('_')[1]
+                        doc = searcher.doc(doc_id)
                         if doc is None:
                             continue
 
