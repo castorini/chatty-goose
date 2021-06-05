@@ -68,6 +68,7 @@ def run_experiment(rp: RetrievalPipeline):
             for session in data:
                 session_num = str(session["number"])
                 start_time = time.time()
+                manual_context_buffer = []
 
                 for turn_id, conversations in enumerate(session["turn"]):
                     query = conversations["raw_utterance"]
@@ -79,30 +80,20 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    hits = rp.retrieve(query)
-                    for rank in range(len(hits)):
-                        docno = hits[rank].docid
-                        fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
-
                     if conversations.get("manual_canonical_result_id", None):
                         doc_id = conversations["manual_canonical_result_id"].split('_')[1]
                         doc = searcher.doc(doc_id)
                         if doc is None:
                             continue
 
-                        query = json.loads(doc.raw())['contents']
-                        total_query_count += 1
+                        context = json.loads(doc.raw())['contents']
+                        manual_context_buffer.append(context)
 
-                        conversation_num = str(conversations["number"])
-                        qid = session_num + "_" + conversation_num
-
-                        qr_start_time = time.time()
-                        qr_total_time += time.time() - qr_start_time
-
-                        hits = rp.retrieve(query)
-                        for rank in range(len(hits)):
-                            docno = hits[rank].docid
-                            fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
+                    # use current query along with last 2 from buffer
+                    hits = rp.retrieve(query+manual_context_buffer[2:])
+                    for rank in range(len(hits)):
+                        docno = hits[rank].docid
+                        fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
 
                 rp.reset_history()
                 time_per_query = (time.time() - start_time) / (turn_id + 1)
