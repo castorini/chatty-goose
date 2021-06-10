@@ -45,7 +45,7 @@ class Ntr(ConversationalQueryRewriter):
         src_text = " ||| ".join(self.history)
         src_text = " ".join([tok.text for tok in self.nlp(src_text)])
         input_ids = self.tokenizer(
-            src_text, return_tensors="pt", add_special_tokens=True
+            src_text, return_tensors="pt", add_special_tokens=True, max_length=512, truncation=True
         ).input_ids.to(self.device)
 
         # Generate new sequence
