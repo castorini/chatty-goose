@@ -42,11 +42,11 @@ class RetrievalPipeline:
         self.reranker_query_index = reranker_query_index
         self.reranker_query_reformulator = reranker_query_reformulator
 
-    def retrieve(self, query) -> List[JSimpleSearcherResult]:
+    def retrieve(self, query, context=None) -> List[JSimpleSearcherResult]:
         cqr_hits = []
         cqr_queries = []
         for cqr in self.reformulators:
-            new_query = cqr.rewrite(query)
+            new_query = cqr.rewrite(query, context)
             hits = self.searcher.search(new_query, k=self.searcher_num_hits)
             cqr_hits.append(hits)
             cqr_queries.append(new_query)

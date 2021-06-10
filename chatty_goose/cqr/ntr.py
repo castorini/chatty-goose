@@ -36,11 +36,15 @@ class Ntr(ConversationalQueryRewriter):
         self.nlp = English()
         self.history = []
 
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str, context: str = None) -> str:
         start_time = time.time()
         self.turn_id += 1
 
         # Build input sequence from query and history
+        if context:
+            if len(self.history) >= 2:
+                self.history.pop(-2)
+            self.history += [context]
         self.history += [query]
         src_text = " ||| ".join(self.history)
         src_text = " ".join([tok.text for tok in self.nlp(src_text)])

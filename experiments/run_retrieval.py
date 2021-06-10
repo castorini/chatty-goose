@@ -90,7 +90,7 @@ def run_experiment(rp: RetrievalPipeline):
                         manual_context_buffer.append(context)
 
                     # use current query along with last 2 from buffer
-                    hits = rp.retrieve((query+manual_context_buffer[-1]))
+                    hits = rp.retrieve(query, manual_context_buffer[-1])
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
