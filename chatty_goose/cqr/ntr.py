@@ -44,6 +44,7 @@ class Ntr(ConversationalQueryRewriter):
         # Build input sequence from query and history
         if len(self.history) >= 2 and self.has_context:
             self.history.pop(-2)
+            self.has_context = False
         if context:
             self.history += [context]
             self.has_context = True
