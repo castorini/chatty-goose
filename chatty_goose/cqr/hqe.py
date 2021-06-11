@@ -32,7 +32,7 @@ class Hqe(ConversationalQueryRewriter):
         self.key_word_list = collections.defaultdict(list)
         self.subkey_word_list = collections.defaultdict(list)
 
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str, context: str = None) -> str:
         start_time = time.time()
         self.turn_id += 1
         self.key_word_extraction(query)
