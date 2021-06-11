@@ -80,17 +80,17 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
+                    context = None
+
                     if conversations.get("manual_canonical_result_id", None):
                         doc_id = conversations["manual_canonical_result_id"].split('_')[1]
                         doc = searcher.doc(doc_id)
-                        if doc is None:
-                            continue
-
-                        context = json.loads(doc.raw())['contents']
-                        manual_context_buffer.append(context)
-
+                        if doc is not None:
+                            context = json.loads(doc.raw())['contents']
+                            manual_context_buffer.append(context)
                     # use current query along with last 2 from buffer
-                    hits = rp.retrieve(query, manual_context_buffer[-1])
+                    hits = rp.retrieve(query, context)
+
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))

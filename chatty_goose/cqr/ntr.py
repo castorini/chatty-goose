@@ -35,21 +35,23 @@ class Ntr(ConversationalQueryRewriter):
         self.tokenizer = T5Tokenizer.from_pretrained(settings.model_name)
         self.nlp = English()
         self.history = []
+        self.has_context = False
 
     def rewrite(self, query: str, context: str = None) -> str:
         start_time = time.time()
         self.turn_id += 1
 
         # Build input sequence from query and history
+        if len(self.history) >= 2 and self.has_context:
+            self.history.pop(-2)
         if context:
-            if len(self.history) >= 2:
-                self.history.pop(-2)
             self.history += [context]
+            self.has_context = True
         self.history += [query]
         src_text = " ||| ".join(self.history)
         src_text = " ".join([tok.text for tok in self.nlp(src_text)])
         input_ids = self.tokenizer(
-            src_text, return_tensors="pt", add_special_tokens=True, max_length=512, truncation=True
+            src_text, return_tensors="pt", add_special_tokens=True
         ).input_ids.to(self.device)
 
         # Generate new sequence
