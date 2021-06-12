@@ -35,6 +35,8 @@ class Hqe(ConversationalQueryRewriter):
     def rewrite(self, query: str, context: str = None) -> str:
         start_time = time.time()
         self.turn_id += 1
+        if context:
+            self.key_word_extraction(context)
         self.key_word_extraction(query)
         if self.turn_id != 0:
             hits = self.searcher.search(query, 1)
