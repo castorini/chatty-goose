@@ -43,7 +43,7 @@ class Ntr(ConversationalQueryRewriter):
 
         # If the passage from canonical result (context) is provided, it is added to history.
         # Since canonical passage can be large and there is limit on length of tokens,
-        # only passage for most recent query is used at a time.
+        # only one passage for the new query is used at a time.
         if len(self.history) >= 2 and self.has_canonical_context:
             self.history.pop(-2)
             self.has_canonical_context = False
