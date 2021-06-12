@@ -35,19 +35,22 @@ class Ntr(ConversationalQueryRewriter):
         self.tokenizer = T5Tokenizer.from_pretrained(settings.model_name)
         self.nlp = English()
         self.history = []
-        self.has_context = False
+        self.has_canonical_context = False
 
     def rewrite(self, query: str, context: str = None) -> str:
         start_time = time.time()
         self.turn_id += 1
 
-        # Build input sequence from query and history
-        if len(self.history) >= 2 and self.has_context:
+        # Removes previously added canonical passage due to token limit
+        if len(self.history) >= 2 and self.has_canonical_context:
             self.history.pop(-2)
-            self.has_context = False
+            self.has_canonical_context = False
+
         if context:
             self.history += [context]
-            self.has_context = True
+            self.has_canonical_context = True
+
+        # Build input sequence from query and history
         self.history += [query]
         src_text = " ||| ".join(self.history)
         src_text = " ".join([tok.text for tok in self.nlp(src_text)])
