@@ -59,9 +59,6 @@ def parse_experiment_args():
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
         with open(args.output + ".doc.tsv", "w") as fout1:
-            if args.context_index:  # use context for CAsT2020 data
-                searcher = SimpleSearcher.from_prebuilt_index(args.context_index)
-
             total_query_count = 0
             with open(args.qid_queries) as json_file:
                 data = json.load(json_file)
@@ -83,9 +80,9 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    if args.context_index:
+                    if rp.context_searcher:
                         doc_id = conversations[args.context_field].split('_')[1]
-                        doc = searcher.doc(doc_id)
+                        doc = rp.context_searcher.doc(doc_id)
                         if doc is not None:
                             manual_context_buffer[turn_id] = json.loads(doc.raw())['contents']
 
@@ -169,6 +166,9 @@ if __name__ == "__main__":
         )
         reranker_query_reformulator = Hqe(searcher, hqe_bert_settings)
 
+    # use context index for CAsT2020 data
+    context_searcher = SimpleSearcher.from_prebuilt_index(args.context_index) if args.context_index else None
+
     rp = RetrievalPipeline(
         searcher,
         reformulators,
@@ -176,5 +176,6 @@ if __name__ == "__main__":
         early_fusion=not args.late_fusion,
         reranker=reranker,
         reranker_query_reformulator=reranker_query_reformulator,
+        context_searcher=context_searcher,
     )
     run_experiment(rp)

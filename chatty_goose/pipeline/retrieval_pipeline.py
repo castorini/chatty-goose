@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 from chatty_goose.cqr import ConversationalQueryRewriter
 from chatty_goose.util import reciprocal_rank_fusion
@@ -33,6 +33,7 @@ class RetrievalPipeline:
         reranker: Reranker = None,
         reranker_query_index: int = -1,
         reranker_query_reformulator: ConversationalQueryRewriter = None,
+        context_searcher: Optional[SimpleSearcher] = None,
     ):
         self.searcher = searcher
         self.reformulators = reformulators
@@ -41,6 +42,7 @@ class RetrievalPipeline:
         self.reranker = reranker
         self.reranker_query_index = reranker_query_index
         self.reranker_query_reformulator = reranker_query_reformulator
+        self.context_searcher = context_searcher
 
     def retrieve(self, query, context: str = None) -> List[JSimpleSearcherResult]:
         cqr_hits = []
