@@ -1,6 +1,7 @@
 import logging
 import time
 import torch
+from typing import Optional
 
 from chatty_goose.settings import NtrSettings
 from spacy.lang.en import English
@@ -37,7 +38,7 @@ class Ntr(ConversationalQueryRewriter):
         self.history = []
         self.has_canonical_context = False
 
-    def rewrite(self, query: str, context: str = None) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None) -> str:
         start_time = time.time()
         self.turn_id += 1
 

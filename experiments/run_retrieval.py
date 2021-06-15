@@ -22,6 +22,8 @@ def parse_experiment_args():
     parser.add_argument('--reranker_device', default='cuda', help='reranker device to use')
     parser.add_argument('--late_fusion', action='store_true', help='perform late instead of early fusion')
     parser.add_argument('--verbose', action='store_true', help='verbose log output')
+    parser.add_argument('--context_field', default='manual_canonical_result_id', help='doc id for additional context')
+    parser.add_argument('--context_index', help='index for context searcher')
 
     # Parameters for BM25. See Anserini MS MARCO documentation to understand how these parameter values were tuned
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
@@ -57,7 +59,8 @@ def parse_experiment_args():
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
         with open(args.output + ".doc.tsv", "w") as fout1:
-            searcher = SimpleSearcher.from_prebuilt_index('msmarco-passage')
+            if args.context_index:  # use context for CAsT2020 data
+                searcher = SimpleSearcher.from_prebuilt_index(args.context_index)
 
             total_query_count = 0
             with open(args.qid_queries) as json_file:
@@ -68,7 +71,7 @@ def run_experiment(rp: RetrievalPipeline):
             for session in data:
                 session_num = str(session["number"])
                 start_time = time.time()
-                manual_context_buffer = []
+                manual_context_buffer = [None for i in range(len(session))]
 
                 for turn_id, conversations in enumerate(session["turn"]):
                     query = conversations["raw_utterance"]
@@ -80,15 +83,13 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    context = None
-                    if conversations.get("manual_canonical_result_id", None):
-                        doc_id = conversations["manual_canonical_result_id"].split('_')[1]
+                    if args.context_index:
+                        doc_id = conversations[args.context_field].split('_')[1]
                         doc = searcher.doc(doc_id)
                         if doc is not None:
-                            context = json.loads(doc.raw())['contents']
-                            manual_context_buffer.append(context)
+                            manual_context_buffer[turn_id] = json.loads(doc.raw())['contents']
 
-                    hits = rp.retrieve(query, context)
+                    hits = rp.retrieve(query, manual_context_buffer[turn_id])
 
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
