@@ -71,7 +71,7 @@ def run_experiment(rp: RetrievalPipeline):
             for session in data:
                 session_num = str(session["number"])
                 start_time = time.time()
-                manual_context_buffer = [None for i in range(len(session))]
+                manual_context_buffer = [None for i in range(len(session["turn"]))]
 
                 for turn_id, conversations in enumerate(session["turn"]):
                     query = conversations["raw_utterance"]
