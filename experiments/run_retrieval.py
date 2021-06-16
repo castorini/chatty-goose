@@ -80,8 +80,9 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    docid = conversations[args.context_field].split('_')[-1]
-                    manual_context_buffer[turn_id] = rp.get_context(docid)
+                    if args.context_field:
+                        docid = conversations[args.context_field].split('_')[-1]
+                        manual_context_buffer[turn_id] = rp.get_context(docid)
 
                     hits = rp.retrieve(query, manual_context_buffer[turn_id])
 
