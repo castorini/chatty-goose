@@ -1,6 +1,7 @@
 import logging
 import time
 import torch
+from typing import Optional
 
 from chatty_goose.settings import NtrSettings
 from spacy.lang.en import English
@@ -35,10 +36,21 @@ class Ntr(ConversationalQueryRewriter):
         self.tokenizer = T5Tokenizer.from_pretrained(settings.model_name)
         self.nlp = English()
         self.history = []
+        self.has_canonical_context = False
 
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None) -> str:
         start_time = time.time()
         self.turn_id += 1
+
+        # If the passage from canonical result (context) is provided, it is added to history.
+        # Since canonical passage can be large and there is limit on length of tokens,
+        # only one passage for the new query is used at a time.
+        if len(self.history) >= 2 and self.has_canonical_context:
+            self.history.pop(-2)
+            self.has_canonical_context = False
+        if context:
+            self.history += [context]
+            self.has_canonical_context = True
 
         # Build input sequence from query and history
         self.history += [query]

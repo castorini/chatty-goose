@@ -1,3 +1,4 @@
+from typing import Optional
 from abc import abstractmethod
 import logging
 
@@ -7,6 +8,7 @@ __all__ = ["ConversationalQueryRewriter"]
 
 class ConversationalQueryRewriter:
     """Base conversational query reformulation class"""
+
     def __init__(self, name: str, verbose: bool = False):
         self.name = name
         self.turn_id: int = -1
@@ -14,7 +16,7 @@ class ConversationalQueryRewriter:
         self.verbose: bool = verbose
 
     @abstractmethod
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None) -> str:
         """Rewrite original query text"""
         raise NotImplementedError
 

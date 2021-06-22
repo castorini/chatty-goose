@@ -1,5 +1,6 @@
 import logging
-from typing import List
+import json
+from typing import List, Optional, Union
 
 from chatty_goose.cqr import ConversationalQueryRewriter
 from chatty_goose.util import reciprocal_rank_fusion
@@ -33,6 +34,7 @@ class RetrievalPipeline:
         reranker: Reranker = None,
         reranker_query_index: int = -1,
         reranker_query_reformulator: ConversationalQueryRewriter = None,
+        context_searcher: Optional[SimpleSearcher] = None,
     ):
         self.searcher = searcher
         self.reformulators = reformulators
@@ -41,12 +43,13 @@ class RetrievalPipeline:
         self.reranker = reranker
         self.reranker_query_index = reranker_query_index
         self.reranker_query_reformulator = reranker_query_reformulator
+        self.context_searcher = context_searcher
 
-    def retrieve(self, query) -> List[JSimpleSearcherResult]:
+    def retrieve(self, query, context: Optional[str] = None) -> List[JSimpleSearcherResult]:
         cqr_hits = []
         cqr_queries = []
         for cqr in self.reformulators:
-            new_query = cqr.rewrite(query)
+            new_query = cqr.rewrite(query, context)
             hits = self.searcher.search(new_query, k=self.searcher_num_hits)
             cqr_hits.append(hits)
             cqr_queries.append(new_query)
@@ -97,3 +100,11 @@ class RetrievalPipeline:
 
         if self.reranker_query_reformulator:
             self.reranker_query_reformulator.reset_history()
+
+    def get_context(self, docid: Union[str, int]) -> Optional[str]:
+        if not self.context_searcher:
+            return None
+        doc = self.context_searcher.doc(docid)
+        if doc is not None:
+            return json.loads(doc.raw())['contents']
+        return None

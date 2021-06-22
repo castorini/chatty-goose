@@ -1,6 +1,7 @@
 import collections
 import re
 import time
+from typing import Optional
 
 import spacy
 from chatty_goose.settings import HqeSettings
@@ -32,10 +33,10 @@ class Hqe(ConversationalQueryRewriter):
         self.key_word_list = collections.defaultdict(list)
         self.subkey_word_list = collections.defaultdict(list)
 
-    def rewrite(self, query: str) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None) -> str:
         start_time = time.time()
         self.turn_id += 1
-        self.key_word_extraction(query)
+        self.key_word_extraction(context+" "+query if context else query)
         if self.turn_id != 0:
             hits = self.searcher.search(query, 1)
             key_word = self.query_expansion(

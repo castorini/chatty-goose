@@ -8,6 +8,8 @@ from chatty_goose.settings import HqeSettings, SearcherSettings, NtrSettings
 from chatty_goose.types import CqrType, PosFilter
 from chatty_goose.util import build_bert_reranker, build_searcher
 
+from pyserini.search import SimpleSearcher
+
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
@@ -20,6 +22,8 @@ def parse_experiment_args():
     parser.add_argument('--reranker_device', default='cuda', help='reranker device to use')
     parser.add_argument('--late_fusion', action='store_true', help='perform late instead of early fusion')
     parser.add_argument('--verbose', action='store_true', help='verbose log output')
+    parser.add_argument('--context_field', default='manual_canonical_result_id', help='doc id for additional context')
+    parser.add_argument('--context_index', help='index for context searcher')
 
     # Parameters for BM25. See Anserini MS MARCO documentation to understand how these parameter values were tuned
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
@@ -28,7 +32,7 @@ def parse_experiment_args():
     parser.add_argument('--fb_terms', default=10, type=int, help='RM3 parameter: number of expansion terms')
     parser.add_argument('--fb_docs', default=10, type=int, help='RM3 parameter: number of documents')
     parser.add_argument('--original_query_weight', default=0.8, type=float, help='RM3 parameter: weight to assign to the original query')
-    
+
     # Parameters for HQE. The default values are tuned on CAsT train data
     parser.add_argument('--M0', default=5, type=int, help='aggregate historcial queries for first stage (BM25) retrieval')
     parser.add_argument('--M1', default=1, type=int, help='aggregate historcial queries for second stage (BERT) retrieval')
@@ -55,7 +59,6 @@ def parse_experiment_args():
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
         with open(args.output + ".doc.tsv", "w") as fout1:
-
             total_query_count = 0
             with open(args.qid_queries) as json_file:
                 data = json.load(json_file)
@@ -65,6 +68,7 @@ def run_experiment(rp: RetrievalPipeline):
             for session in data:
                 session_num = str(session["number"])
                 start_time = time.time()
+                manual_context_buffer = [None for i in range(len(session["turn"]))]
 
                 for turn_id, conversations in enumerate(session["turn"]):
                     query = conversations["raw_utterance"]
@@ -76,7 +80,12 @@ def run_experiment(rp: RetrievalPipeline):
                     qr_start_time = time.time()
                     qr_total_time += time.time() - qr_start_time
 
-                    hits = rp.retrieve(query)
+                    if args.context_index:
+                        docid = conversations[args.context_field].split('_')[-1]
+                        manual_context_buffer[turn_id] = rp.get_context(docid)
+
+                    hits = rp.retrieve(query, manual_context_buffer[turn_id])
+
                     for rank in range(len(hits)):
                         docno = hits[rank].docid
                         fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
@@ -155,6 +164,9 @@ if __name__ == "__main__":
         )
         reranker_query_reformulator = Hqe(searcher, hqe_bert_settings)
 
+    # use context index for CAsT2020 data
+    context_searcher = SimpleSearcher.from_prebuilt_index(args.context_index) if args.context_index else None
+
     rp = RetrievalPipeline(
         searcher,
         reformulators,
@@ -162,5 +174,6 @@ if __name__ == "__main__":
         early_fusion=not args.late_fusion,
         reranker=reranker,
         reranker_query_reformulator=reranker_query_reformulator,
+        context_searcher=context_searcher,
     )
     run_experiment(rp)
