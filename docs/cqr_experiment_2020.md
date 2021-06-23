@@ -8,9 +8,21 @@
 
 ## Run CQR retrieval
 
-The run is same as for the [CQR experiment for 2019 data](./cqr_experiments.md).  The index `cast2019` can still be used to perform bm25 search since `cast2019` and `cast2020` share the same corpus. 
+The run is similar to the run for the [CQR experiment for 2019 data](./cqr_experiments.md). For canonical runs, you also need to specify an extra `--context_index` flag to define the index from which the canonical passage is retrieved from.
 
-In naive run, only the `raw_utterance` is used. In the canonical run, the passage corresponding to `manual_canonical_result_id` is used in the context. 
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment hqe \
+      --context_index msmarco-passage \
+      --hits 1000 \
+      --index cast2019 \
+      --qid_queries $input_query_json \
+      --output ./output/hqe_bm25 \
+```
+
+The index `cast2019` can still be used to perform bm25 search since `cast2019` and `cast2020` share the same corpus. 
+
+In the naive run, only the `raw_utterance` is used. In the canonical run, the passage corresponding to `manual_canonical_result_id` is also used in the context. 
 
 ## Evaluation results
 
