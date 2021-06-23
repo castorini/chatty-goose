@@ -30,7 +30,7 @@ Evaluation is done in same way as described in [CQR experiment for CAsT2019](./c
 
 ## Evaluation results
 
-Results for the CAsT 2020 evaluation dataset are provided below for both naive and canonical runs. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`.
+Results for the CAsT 2020 evaluation dataset are provided below for both naive and canonical runs. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`.
 
 ### Naive
 
