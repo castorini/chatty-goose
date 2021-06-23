@@ -1,4 +1,4 @@
-# Experiments for CQR with CAsT 2020 Data
+# Experiments for CQR with CAsT 2020
 
 ## Data Preparation
 
@@ -8,7 +8,7 @@
 
 ## Run CQR retrieval
 
-The run is similar to the run for the [CQR experiment for 2019 data](./cqr_experiments.md). For canonical runs, you also need to specify an extra `--context_index` flag to define the index from which the canonical passage is retrieved from.
+The run is similar to the run for the [CQR experiment for CAsT2019](./cqr_experiments.md). For canonical runs, you also need to specify an extra `--context_index` flag to define the index from which the canonical passage is retrieved from.
 
 ```shell=bash
 python -m experiments.run_retrieval \
