@@ -67,7 +67,7 @@ def parse_experiment_args():
     args = parser.parse_args()
     return args
 
-    assert (args.index==None) and (args.dense_index==None)
+    
 
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
@@ -125,6 +125,7 @@ def run_experiment(rp: RetrievalPipeline):
 
 if __name__ == "__main__":
     args = parse_experiment_args()
+    assert (args.index!=None) or (args.dense_index!=None), "Must input at least one index for search"
     experiment = CqrType(args.experiment)
 
     searcher_settings = SearcherSettings(
