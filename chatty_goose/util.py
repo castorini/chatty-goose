@@ -1,10 +1,12 @@
+import sys 
+sys.path.append('./pyserini') 
 import logging
 from os import path
 from typing import Dict, List, Tuple
 
 from pygaggle.rerank.transformer import MonoBERT
 from pyserini.search import JSimpleSearcherResult, SimpleSearcher
-
+from pyserini.dsearch import SimpleDenseSearcher
 from chatty_goose.settings import SearcherSettings
 
 
@@ -50,21 +52,43 @@ def build_bert_reranker(
 
 
 def build_searcher(settings: SearcherSettings) -> SimpleSearcher:
-    if path.isdir(settings.index_path):
-        searcher = SimpleSearcher(settings.index_path)
-    else:
-        searcher = SimpleSearcher.from_prebuilt_index(settings.index_path)
-    searcher.set_bm25(float(settings.k1), float(settings.b))
-    logging.info(
-        "Initializing BM25, setting k1={} and b={}".format(settings.k1, settings.b)
-    )
-    if settings.rm3:
-        searcher.set_rm3(
-            settings.fb_terms, settings.fb_docs, settings.original_query_weight
-        )
+    if settings.index_path==None:
         logging.info(
-            "Initializing RM3, setting fbTerms={}, fbDocs={} and originalQueryWeight={}".format(
+            "Cannot find bm25 index, skip bm25 search!")
+        searcher=None
+    else: 
+        if path.isdir(settings.index_path):
+            searcher = SimpleSearcher(settings.index_path)
+        else:
+            searcher = SimpleSearcher.from_prebuilt_index(settings.index_path)
+        searcher.set_bm25(float(settings.k1), float(settings.b))
+        logging.info(
+            "Initializing BM25, setting k1={} and b={}".format(settings.k1, settings.b)
+        )
+        if settings.rm3:
+            searcher.set_rm3(
                 settings.fb_terms, settings.fb_docs, settings.original_query_weight
             )
-        )
+            logging.info(
+                "Initializing RM3, setting fbTerms={}, fbDocs={} and originalQueryWeight={}".format(
+                    settings.fb_terms, settings.fb_docs, settings.original_query_weight
+                )
+            )
+    return searcher
+
+def build_dense_searcher(settings: SearcherSettings) -> SimpleDenseSearcher:
+    if (settings.index_path==None) or (settings.query_encoder==None):
+        logging.info(
+            "Cannot find dense index or query encoder, skip dense search!")
+        searcher = None
+    else:
+        logging.info(
+            "Load dense index: {}".format(settings.index_path))
+        if path.isdir(settings.index_path):
+            searcher = SimpleDenseSearcher(settings.index_path, settings.query_encoder)
+        else:
+            searcher = SimpleDenseSearcher.from_prebuilt_index(settings.index_path, settings.query_encoder)
+        # logging.info(
+        #     "Load, setting k1={} and b={}".format(settings.k1, settings.b)
+        # )
     return searcher

@@ -8,5 +8,6 @@ class PosFilter(str, Enum):
 
 class CqrType(str, Enum):
     HQE = "hqe"
+    CQE = "cqe"
     T5 = "t5"
     FUSION = "fusion"

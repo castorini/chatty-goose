@@ -5,11 +5,15 @@ from typing import Optional
 
 import spacy
 from chatty_goose.settings import HqeSettings
-from pyserini.search import SimpleSearcher
-
 from .cqr import ConversationalQueryRewriter
 
-__all__ = ["Hqe"]
+import sys 
+sys.path.append('../pyserini') 
+from pyserini.search import SimpleSearcher
+
+
+name = "Hqe"
+__all__ = [name]
 
 nlp = spacy.load("en_core_web_sm")
 STOP_WORDS = nlp.Defaults.stop_words
@@ -19,8 +23,8 @@ class Hqe(ConversationalQueryRewriter):
     """Historical Query Expansion for conversational query reformulation"""
 
     def __init__(self, searcher: SimpleSearcher, settings: HqeSettings = HqeSettings()):
-        super().__init__("Hqe", verbose=settings.verbose)
-
+        super().__init__(name, verbose=settings.verbose)
+        self.name = name
         # Model settings
         self.M = settings.M
         self.eta = settings.eta
