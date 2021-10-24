@@ -14,7 +14,7 @@ export input_query_json=data/treccastweb/2019/data
 
 ## Run CQE retrieval
 
-The following command is for CQE, but you can also run other CQR methods using `t5` or `fusion` as the input to the `--experiment` flag (Currently, dense retrieval does not support HQE since it requires longer query sequence). Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--index` flag). It is also possible to supply a path to a local directory containing the index.
+The following command is for CQE, but you can also run other CQR methods using `t5` or `cqe_t5_fusion` as the input to the `--experiment` flag (Currently, dense retrieval does not support HQE since it requires longer query sequence). Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--index` flag). It is also possible to supply a path to a local directory containing the index.
 ### CQE BM25 Retrieval
 
 ```shell=bash
@@ -68,11 +68,11 @@ $path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
 Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in our paper are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
 
 |             | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
-| ----------- | :------: | :-------------: | :-------------:  :-----: | :------------: | :---------: | :----------------: |
-| mAP         |  0.2059  |     0.2616      |     0.2997      | 0.2250  |     0.2512     |   0.2584    |       0.3739       |
-| Recall@1000 |  0.7705  |     0.7248      |     0.7984      | 0.7392  |     0.6734     |   0.8028    |       0.8028       |
-| NDCG@1      |  0.3030  |     0.5082      |     0.4971      | 0.2842  |     0.4841     |   0.3353    |       0.5838       |
-| NDCG@3      |  0.2740  |     0.4924      |     0.5032      | 0.2954  |     0.4688     |   0.3247    |       0.5640       |
+| ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
+| mAP         |  0.2059  |     0.2616      |     0.2997      | 0.2250  |     0.2512     |   0.3043    |       0.3391       |
+| Recall@1000 |  0.7705  |     0.7248      |     0.7984      | 0.7392  |     0.6734     |   0.7856    |       0.8376       |
+| NDCG@1      |  0.3030  |     0.5082      |     0.4971      | 0.2842  |     0.4841     |   0.5077    |       0.5318       |
+| NDCG@3      |  0.2740  |     0.4924      |     0.5032      | 0.2954  |     0.4688     |   0.5065    |       0.5226       |
 
 ## Reproduction Log
 

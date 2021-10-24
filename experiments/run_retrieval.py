@@ -16,7 +16,7 @@ from pyserini.dsearch import SimpleDenseSearcher
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
-    parser.add_argument('--experiment', type=str, help='Type of experiment (hqe, t5, fusion)')
+    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, fusion)')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', default=None, help='bm25 index path')
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         hqe_bm25 = Hqe(searcher, hqe_bm25_settings)
         reformulators.append(hqe_bm25)
 
-    if experiment == CqrType.T5 or experiment == CqrType.FUSION:
+    if experiment == CqrType.T5 or experiment == CqrType.FUSION or experiment == CqrType.CQE_T5_FUSION:
         # Initialize T5 NTR
         t5_settings = NtrSettings(
             model_name=args.t5_model_name,
@@ -184,7 +184,7 @@ if __name__ == "__main__":
         )
         reranker_query_reformulator = Hqe(searcher, hqe_bert_settings)
 
-    if experiment == CqrType.CQE:
+    if experiment == CqrType.CQE or experiment == CqrType.CQE_T5_FUSION:
         cqe_settings = CqeSettings(
             model_name=args.cqe_model_name,
             l2_threshold=args.cqe_l2_threshold,
