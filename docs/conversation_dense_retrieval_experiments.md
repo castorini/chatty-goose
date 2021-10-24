@@ -14,7 +14,7 @@ export input_query_json=data/treccastweb/2019/data
 
 ## Run CQE retrieval
 
-The following command is for CQE, but you can also run other CQR methods using `t5` or `cqe_t5_fusion` as the input to the `--experiment` flag (Currently, dense retrieval does not support HQE since it requires longer query sequence). Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--index` flag). It is also possible to supply a path to a local directory containing the index.
+The following command is for CQE, but you can also run other CQR methods using `t5` or `cqe_t5_fusion` as the input to the `--experiment` flag (Currently, dense retrieval does not support HQE since it requires longer query sequence). Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--index` flag). It is also possible to supply a path to a local directory containing the index. Note that now the hsw dense index is stored at Orca:store/scratch/s269lin/cast/indexes. So now just input the dense_index as absolute path.
 ### CQE BM25 Retrieval
 
 ```shell=bash
