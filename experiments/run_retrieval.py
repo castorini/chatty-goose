@@ -16,7 +16,7 @@ from pyserini.dsearch import SimpleDenseSearcher
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
-    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, fusion)')
+    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, fusion, cqe_t5_fusion)')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', default=None, help='bm25 index path')
