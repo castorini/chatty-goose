@@ -45,8 +45,19 @@ python -m experiments.run_retrieval \
       --output ./output/cqe_hybrid \
       --cqe_l2_threshold 12 \
 ```
+### CQE fuse T5 Sparse-Dense Hybrid Retrieval
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment cqe_t5_fusion \
+      --dense_index=../cast/indexes \
+      --index cast2019 \
+      --hits 1000 \
+      --qid_queries $input_query_json \
+      --output ./output/cqe_t5_hybrid \
+      --cqe_l2_threshold 12 \
+```
 
-The experiment will output the retrieval results at the specified location in TSV format. By default, this will perform retrieval using only BM25, but you can add the `--rerank` flag to further rerank these results using BERT. For other command line arguments, see [run_retrieval.py](../experiments/run_retrieval.py).
+The experiment will output the retrieval results at the specified location in TSV format. For other command line arguments, see [run_retrieval.py](../experiments/run_retrieval.py).
 
 ## Evaluate CQR results
 
@@ -54,18 +65,18 @@ Convert the TSV file from above to TREC format and use the TREC tool to evaluate
 
 ```shell=bash
 python $path_to_anserini/tools/scripts/msmarco/convert_msmarco_to_trec_run.py \
-      --input ./output/hqe_bm25.tsv \
-      --output ./output/hqe_bm25.trec
+      --input ./output/cqe_t5_hybrid.tsv \
+      --output ./output/cqe_t5_hybrid.trec
 
 $path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
       -c -mrecall.1000 -mmap -mndcg_cut.1,3 \
       ./output/answer_file \
-      ./output/hqe_bm25.trec
+      ./output/cqe_t5_hybrid.trec
 ```
 
 ## Evaluation results
 
-Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in our paper are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
+Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in [CQE paper]((https://arxiv.org/abs/2104.08707)) are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
 
 |             | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
 | ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
