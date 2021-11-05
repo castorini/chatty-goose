@@ -1,22 +1,27 @@
+# Now we import pyserini directly from folder since input embeddings to SimpleDenseSearcher.search are not upgraded
+import sys 
+sys.path.append('../pyserini') 
 import argparse
 import json
 import time
 
-from chatty_goose.cqr import Hqe, Ntr
+from chatty_goose.cqr import Hqe, Ntr, Cqe
 from chatty_goose.pipeline import RetrievalPipeline
-from chatty_goose.settings import HqeSettings, SearcherSettings, NtrSettings
+from chatty_goose.settings import SearcherSettings, DenseSearcherSettings, HqeSettings, NtrSettings, CqeSettings
 from chatty_goose.types import CqrType, PosFilter
-from chatty_goose.util import build_bert_reranker, build_searcher
+from chatty_goose.util import build_bert_reranker, build_searcher, build_dense_searcher
 
 from pyserini.search import SimpleSearcher
-
+from pyserini.dsearch import SimpleDenseSearcher
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
-    parser.add_argument('--experiment', type=str, help='Type of experiment (hqe, t5, fusion)')
+    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, fusion, cqe_t5_fusion)')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
-    parser.add_argument('--index', required=True, default='', help='index path')
+    parser.add_argument('--index', default=None, help='bm25 index path')
+    parser.add_argument('--dense_index', default=None, help='dense index path')
+    parser.add_argument('--query_encoder', default='castorini/tct_colbert-v2-msmarco', help='query encoder model path')
     parser.add_argument('--hits', default=10, help='number of hits to retrieve')
     parser.add_argument('--rerank', action='store_true', help='rerank BM25 output using BERT')
     parser.add_argument('--reranker_device', default='cuda', help='reranker device to use')
@@ -51,10 +56,18 @@ def parse_experiment_args():
     parser.add_argument('--no_early_stopping', action='store_false', help='T5 disable early stopping')
     parser.add_argument('--t5_device', default='cuda', help='T5 device to use')
 
+    # Parameters for CQE
+    parser.add_argument('--cqe_model_name', default='castorini/tct_colbert-v2-msmarco-cqe', help='CQE model name')
+    parser.add_argument('--cqe_l2_threshold', default=10.5, help='Term weight threashold for select terms')
+    parser.add_argument('--cqe_max_context_length', default=100, help='CQE max context length')
+    parser.add_argument('--cqe_max_query_length', default=36, help='CQE max query length')
+    parser.add_argument('--cqe_device', default='cpu', help='CQE device to use')
+
     # Return args
     args = parser.parse_args()
     return args
 
+    
 
 def run_experiment(rp: RetrievalPipeline):
     with open(args.output + ".tsv", "w") as fout0:
@@ -112,6 +125,7 @@ def run_experiment(rp: RetrievalPipeline):
 
 if __name__ == "__main__":
     args = parse_experiment_args()
+    assert (args.index!=None) or (args.dense_index!=None), "Must input at least one index for search"
     experiment = CqrType(args.experiment)
 
     searcher_settings = SearcherSettings(
@@ -123,7 +137,14 @@ if __name__ == "__main__":
         fb_docs=args.fb_docs,
         original_query_weight=args.original_query_weight,
     )
+
+    dense_searcher_settings = DenseSearcherSettings(
+        index_path=args.dense_index,
+        query_encoder=args.query_encoder,
+    )
+
     searcher = build_searcher(searcher_settings)
+    dense_searcher = build_dense_searcher(dense_searcher_settings)
 
     # Initialize CQR and reranker
     reformulators = []
@@ -142,7 +163,7 @@ if __name__ == "__main__":
         hqe_bm25 = Hqe(searcher, hqe_bm25_settings)
         reformulators.append(hqe_bm25)
 
-    if experiment == CqrType.T5 or experiment == CqrType.FUSION:
+    if experiment == CqrType.T5 or experiment == CqrType.FUSION or experiment == CqrType.CQE_T5_FUSION:
         # Initialize T5 NTR
         t5_settings = NtrSettings(
             model_name=args.t5_model_name,
@@ -164,11 +185,22 @@ if __name__ == "__main__":
         )
         reranker_query_reformulator = Hqe(searcher, hqe_bert_settings)
 
+    if experiment == CqrType.CQE or experiment == CqrType.CQE_T5_FUSION:
+        cqe_settings = CqeSettings(
+            model_name=args.cqe_model_name,
+            l2_threshold=args.cqe_l2_threshold,
+            max_context_length=args.cqe_max_context_length,
+            max_query_length=args.cqe_max_query_length,
+            verbose=args.verbose,
+        )
+        cqe = Cqe(cqe_settings, device=args.cqe_device)
+        reformulators.append(cqe)
     # use context index for CAsT2020 data
     context_searcher = SimpleSearcher.from_prebuilt_index(args.context_index) if args.context_index else None
 
     rp = RetrievalPipeline(
         searcher,
+        dense_searcher,
         reformulators,
         searcher_num_hits=args.hits,
         early_fusion=not args.late_fusion,
