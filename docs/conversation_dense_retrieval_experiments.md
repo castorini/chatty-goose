@@ -29,7 +29,7 @@ python -m experiments.run_retrieval \
 ```shell=bash
 python -m experiments.run_retrieval \
       --experiment cqe \
-      --dense_index=../cast/indexes \
+      --dense_index cast2019-tct_colbert-v2-hnsw \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_dpr \
@@ -38,23 +38,23 @@ python -m experiments.run_retrieval \
 ```shell=bash
 python -m experiments.run_retrieval \
       --experiment cqe \
-      --dense_index=../cast/indexes \
+      --cqe_l2_threshold 12 \
+      --dense_index cast2019-tct_colbert-v2-hnsw \
       --index cast2019 \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_hybrid \
-      --cqe_l2_threshold 12 \
 ```
 ### CQE fuse T5 Sparse-Dense Hybrid Retrieval
 ```shell=bash
 python -m experiments.run_retrieval \
       --experiment cqe_t5_fusion \
-      --dense_index=../cast/indexes \
+      --cqe_l2_threshold 12 \
+      --dense_index cast2019-tct_colbert-v2-hnsw \
       --index cast2019 \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_t5_hybrid \
-      --cqe_l2_threshold 12 \
 ```
 
 The experiment will output the retrieval results at the specified location in TSV format. For other command line arguments, see [run_retrieval.py](../experiments/run_retrieval.py).
@@ -64,26 +64,46 @@ The experiment will output the retrieval results at the specified location in TS
 Convert the TSV file from above to TREC format and use the TREC tool to evaluate the resuls in terms of Recall@1000, mAP and NDCG@1,3.
 
 ```shell=bash
-python $path_to_anserini/tools/scripts/msmarco/convert_msmarco_to_trec_run.py \
-      --input ./output/cqe_t5_hybrid.tsv \
-      --output ./output/cqe_t5_hybrid.trec
-
-$path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
-      -c -mrecall.1000 -mmap -mndcg_cut.1,3 \
-      ./output/answer_file \
-      ./output/cqe_t5_hybrid.trec
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel $trec_file
 ```
 
 ## Evaluation results
 
-Results for the CAsT 2019 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in [CQE paper]((https://arxiv.org/abs/2104.08707)) are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
+Results for the CAsT 2019 and 2020 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in [CQE paper]((https://arxiv.org/abs/2104.08707)) are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
 
-|             | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
+| CAsT2019    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
 | ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
 | mAP         |  0.2059  |     0.2616      |     0.2997      | 0.2250  |     0.2512     |   0.3043    |       0.3391       |
 | Recall@1000 |  0.7705  |     0.7248      |     0.7984      | 0.7392  |     0.6734     |   0.7856    |       0.8376       |
 | NDCG@1      |  0.3030  |     0.5082      |     0.4971      | 0.2842  |     0.4841     |   0.5077    |       0.5318       |
 | NDCG@3      |  0.2740  |     0.4924      |     0.5032      | 0.2954  |     0.4688     |   0.5065    |       0.5226       |
+
+| CAsT2020    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
+| ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
+| mAP         |  0.1301  |     0.2072      |     0.2400      | 0.1236  |     0.1989     |   0.2309    |       0.2495       |
+| Recall@1000 |  0.6097  |     0.7008      |     0.7410      | 0.5551  |     0.6380     |   0.6983    |       0.7638       |
+| NDCG@1      |  0.1875  |     0.3429      |     0.3794      | 0.1639  |     0.3538     |   0.3742    |       0.3982       |
+| NDCG@3      |  0.1712  |     0.3122      |     0.3383      | 0.1620  |     0.3182     |   0.3323    |       0.3599       |
+
+## Add canonical response
+You can also add canonical response for task of CAsT2020 with the option `--add_response` to specify how many previous response to be added in the context.
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment cqe or t5 or cqe_t5_fusion \
+      --cqe_l2_threshold 12 \
+      --add_response 1 \
+      --dense_index cast2019-tct_colbert-v2-hnsw \
+      --index cast2019 \
+      --hits 1000 \
+      --qid_queries $input_query_json \
+      --output ./output/cqe_t5_hybrid \
+```
+| CAsT2020    | CQE Hybrid | T5 Hybrid |
+| ----------- | :----------------: | :----------------: |
+| mAP         |       0.2225       |       0.2333       |
+| Recall@1000 |       0.7457       |       0.6930       |
+| NDCG@1      |       0.3353       |       0.3934       |
+| NDCG@3      |       0.3106       |       0.3406       |
 
 ## Reproduction Log
 

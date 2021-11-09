@@ -1,5 +1,6 @@
 import sys 
-sys.path.append('../pyserini') # Here we import pyserini from our local, since the current version pyserini did not support dense retrieval with embedding as input (See line 67)
+# sys.path.append('../pyserini') # Here we import pyserini from our local, since the current version pyserini did not support dense retrieval with embedding as input (See line 67)
+from os import path
 import logging
 import json
 from typing import List, Optional, Union
@@ -9,6 +10,7 @@ from chatty_goose.cqr import ConversationalQueryRewriter
 from chatty_goose.util import reciprocal_rank_fusion
 from pygaggle.rerank.base import Query, Reranker, hits_to_texts
 from pyserini.search import JSimpleSearcherResult, SimpleSearcher
+import spacy
 
 
 __all__ = ["RetrievalPipeline"]
@@ -39,7 +41,8 @@ class RetrievalPipeline:
         reranker: Reranker = None,
         reranker_query_index: int = -1,
         reranker_query_reformulator: ConversationalQueryRewriter = None,
-        context_searcher: Optional[SimpleSearcher] = None,
+        add_response: int = 0,
+        context_index_path: str = None
     ):
         self.searcher = searcher
         self.dense_searcher = dense_searcher
@@ -49,14 +52,26 @@ class RetrievalPipeline:
         self.reranker = reranker
         self.reranker_query_index = reranker_query_index
         self.reranker_query_reformulator = reranker_query_reformulator
-        self.context_searcher = context_searcher
+        self.add_response = add_response
+        if add_response > 0:
+            self.nlp = spacy.load("en_core_web_sm")
+            self.nlp.add_pipe(self.nlp.create_pipe("sentencizer"))
+            if self.searcher==None:
+                assert (context_index_path!=None), "No context index path"
+                logging.info("We do not conduct for sparse search. Load another index: {}, for context search ...".format(context_index_path))
+                if path.isdir(context_index_path):
+                    self.context_searcher = SimpleSearcher(context_index_path)
+                else:
+                    self.context_searcher = SimpleSearcher.from_prebuilt_index(context_index_path)
+            else:
+                self.context_searcher = self.searcher
 
     def retrieve(self, query, context: Optional[str] = None) -> List[JSimpleSearcherResult]:
         cqr_hits = []
         cqr_queries = []
         for cqr in self.reformulators:
             sparse_hits, dense_hits = None, None
-            new_query = cqr.rewrite(query, context)
+            new_query = cqr.rewrite(query, context, self.add_response)
             # Sparse search
             if self.searcher!=None:
                 sparse_hits = self.searcher.search(new_query, k=self.searcher_num_hits)
@@ -66,7 +81,7 @@ class RetrievalPipeline:
                     dense_hits = self.dense_searcher.search(cqr.query_embs, k=self.searcher_num_hits)
                 else:
                     dense_hits = self.dense_searcher.search(new_query, k=self.searcher_num_hits)
-                    
+            
             hits = self._hybrid_results(dense_hits, sparse_hits, 0.1, self.searcher_num_hits)
             cqr_hits.append(hits)
             cqr_queries.append(new_query)
@@ -74,11 +89,12 @@ class RetrievalPipeline:
 
         # Merge results from multiple CQR methods if required
         if self.early_fusion or self.reranker is None:
+
             cqr_hits = reciprocal_rank_fusion(cqr_hits)
 
         # Return results if no reranker
         if self.reranker is None:
-            return cqr_hits
+            return cqr_hits[:self.searcher_num_hits]
 
         # Get query for reranker
         if self.reranker_query_reformulator is None:
@@ -119,12 +135,16 @@ class RetrievalPipeline:
         if self.reranker_query_reformulator:
             self.reranker_query_reformulator.reset_history()
 
-    def get_context(self, docid: Union[str, int]) -> Optional[str]:
-        if not self.context_searcher:
+    def get_context(self, docid: Union[str, int], sent_num=1) -> Optional[str]:
+        if self.add_response==0:
             return None
-        doc = self.context_searcher.doc(docid)
+        doc = self.context_searcher.doc(docid).raw()
         if doc is not None:
-            return json.loads(doc.raw())['contents']
+            doc = self.nlp(doc)
+            sentences = [sent.string.strip() for sent in doc.sents]
+            response = ' '.join(sentences[:sent_num])
+
+            return response
         return None
     # Directly copy from pyserini (https://github.com/castorini/pyserini/blob/master/pyserini/hsearch/_hybrid.py)
     @staticmethod 

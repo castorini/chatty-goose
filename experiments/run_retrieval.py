@@ -1,6 +1,6 @@
 # Now we import pyserini directly from folder since input embeddings to SimpleDenseSearcher.search are not upgraded
 import sys 
-sys.path.append('../pyserini') 
+# sys.path.append('../pyserini') 
 import argparse
 import json
 import time
@@ -21,6 +21,7 @@ def parse_experiment_args():
     parser.add_argument('--output', required=True, default='', help='output file')
     parser.add_argument('--index', default=None, help='bm25 index path')
     parser.add_argument('--dense_index', default=None, help='dense index path')
+    parser.add_argument('--context_index', default='cast2019', help='index for searching context text')
     parser.add_argument('--query_encoder', default='castorini/tct_colbert-v2-msmarco', help='query encoder model path')
     parser.add_argument('--hits', default=10, help='number of hits to retrieve')
     parser.add_argument('--rerank', action='store_true', help='rerank BM25 output using BERT')
@@ -28,7 +29,9 @@ def parse_experiment_args():
     parser.add_argument('--late_fusion', action='store_true', help='perform late instead of early fusion')
     parser.add_argument('--verbose', action='store_true', help='verbose log output')
     parser.add_argument('--context_field', default='manual_canonical_result_id', help='doc id for additional context')
-    parser.add_argument('--context_index', help='index for context searcher')
+    parser.add_argument('--add_response', type=int, default=0, help='How many response to add in context')
+    parser.add_argument('--run_name', type=str, default=None, help='run file name printed in trec file')
+
 
     # Parameters for BM25. See Anserini MS MARCO documentation to understand how these parameter values were tuned
     parser.add_argument('--k1', default=0.82, help='BM25 k1 parameter')
@@ -66,58 +69,60 @@ def parse_experiment_args():
     # Return args
     args = parser.parse_args()
     return args
-
     
 
 def run_experiment(rp: RetrievalPipeline):
-    with open(args.output + ".tsv", "w") as fout0:
-        with open(args.output + ".doc.tsv", "w") as fout1:
-            total_query_count = 0
-            with open(args.qid_queries) as json_file:
-                data = json.load(json_file)
+    with open(args.output + ".trec", "w") as fout:
+        total_query_count = 0
+        with open(args.qid_queries) as json_file:
+            data = json.load(json_file)
 
-            qr_total_time = 0
-            initial_time = time.time()
-            for session in data:
-                session_num = str(session["number"])
-                start_time = time.time()
-                manual_context_buffer = [None for i in range(len(session["turn"]))]
+        qr_total_time = 0
+        initial_time = time.time()
+        for session in data:
+            session_num = str(session["number"])
+            start_time = time.time()
+            manual_context_buffer = [None for i in range(len(session["turn"]))]
 
-                for turn_id, conversations in enumerate(session["turn"]):
-                    query = conversations["raw_utterance"]
-                    total_query_count += 1
+            for turn_id, conversations in enumerate(session["turn"]):
+                query = conversations["raw_utterance"]
+                total_query_count += 1
 
-                    conversation_num = str(conversations["number"])
-                    qid = session_num + "_" + conversation_num
+                conversation_num = str(conversations["number"])
+                qid = session_num + "_" + conversation_num
 
-                    qr_start_time = time.time()
-                    qr_total_time += time.time() - qr_start_time
+                # qr_start_time = time.time()
+                # qr_total_time += time.time() - qr_start_time
 
-                    if args.context_index:
-                        docid = conversations[args.context_field].split('_')[-1]
-                        manual_context_buffer[turn_id] = rp.get_context(docid)
+                if args.add_response!=0:
+                    docid = conversations[args.context_field]
+                    manual_context_buffer[turn_id] = rp.get_context(docid)
+                # We don't use the current context for retrieval but save the context for next turn
+                hits = rp.retrieve(query, manual_context_buffer[turn_id])
 
-                    hits = rp.retrieve(query, manual_context_buffer[turn_id])
+                for rank in range(len(hits)):
+                    docno = hits[rank].docid
+                    score = hits[rank].score
+                    fout.write("{} Q0 {} {} {} {}\n".format(qid, docno, rank + 1, score, args.run_name))
 
-                    for rank in range(len(hits)):
-                        docno = hits[rank].docid
-                        fout0.write("{}\t{}\t{}\n".format(qid, docno, rank + 1))
-
-                rp.reset_history()
-                time_per_query = (time.time() - start_time) / (turn_id + 1)
-                print(
-                    "Retrieving session {} with {} queries ({:0.3f} s/query)".format(
-                        session["number"], turn_id + 1, time_per_query
-                    )
-                )
-
-            time_per_query = (time.time() - initial_time) / (total_query_count)
-            qr_time_per_query = qr_total_time / (total_query_count)
+            rp.reset_history()
+            time_per_query = (time.time() - start_time) / (turn_id + 1)
             print(
-                "Retrieving {} queries ({:0.3f} s/query, QR {:0.3f} s/query)".format(
-                    total_query_count, time_per_query, qr_time_per_query
+                "Retrieving session {} with {} queries ({:0.3f} s/query)".format(
+                    session["number"], turn_id + 1, time_per_query
                 )
             )
+
+        time_per_query = (time.time() - initial_time) / (total_query_count)
+        qr_total_time = 0 
+        for reformulator in rp.reformulators:
+            qr_total_time+=reformulator.total_latency
+        qr_time_per_query = qr_total_time / (total_query_count)
+        print(
+            "Retrieving {} queries ({:0.3f} s/query, QR {:0.3f} s/query)".format(
+                total_query_count, time_per_query, qr_time_per_query
+            )
+        )
 
     print("total Query Counts %d" % (total_query_count))
     print("Done!")
@@ -126,6 +131,12 @@ def run_experiment(rp: RetrievalPipeline):
 if __name__ == "__main__":
     args = parse_experiment_args()
     assert (args.index!=None) or (args.dense_index!=None), "Must input at least one index for search"
+    if args.index==None:
+        assert (args.context_index!=None) or (args.add_response==0), "Must input argument context_index"
+    else:
+        args.context_index = args.index
+    if args.run_name==None:
+        args.run_name = 'chatty-goose_' + args.experiment
     experiment = CqrType(args.experiment)
 
     searcher_settings = SearcherSettings(
@@ -195,8 +206,7 @@ if __name__ == "__main__":
         )
         cqe = Cqe(cqe_settings, device=args.cqe_device)
         reformulators.append(cqe)
-    # use context index for CAsT2020 data
-    context_searcher = SimpleSearcher.from_prebuilt_index(args.context_index) if args.context_index else None
+
 
     rp = RetrievalPipeline(
         searcher,
@@ -206,6 +216,7 @@ if __name__ == "__main__":
         early_fusion=not args.late_fusion,
         reranker=reranker,
         reranker_query_reformulator=reranker_query_reformulator,
-        context_searcher=context_searcher,
+        add_response = args.add_response,
+        context_index_path = args.context_index
     )
     run_experiment(rp)

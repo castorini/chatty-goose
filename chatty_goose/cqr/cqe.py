@@ -34,28 +34,24 @@ class Cqe(ConversationalQueryRewriter):
             self.model.to(self.device)
             self.tokenizer = BertTokenizer.from_pretrained(settings.model_name)
             self.has_model = True
+            self.history_query = []
             self.history = []
-            self.has_canonical_context = False
         if (not self.has_model):
             raise Exception('Neither query encoder model nor encoded queries provided. Please provide at least one')
 
-    def rewrite(self, query: str, context: Optional[str] = None) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None, response_num: Optional[int] = 0) -> str:
         start_time = time.time()
         self.turn_id += 1
 
         # If the passage from canonical result (context) is provided, it is added to history.
         # Since canonical passage can be large and there is limit on length of tokens,
         # only one passage for the new query is used at a time.
-        if len(self.history) >= 2 and self.has_canonical_context:
-            self.history.pop(-2)
-            self.has_canonical_context = False
-        if context:
-            self.history += [context]
-            self.has_canonical_context = True
-
-        # Build input sequence from query and history
+        self.history_query += [query]
         self.history += [query]
-        src_ctx = '[CLS] ' +"|".join(self.history[:-1])
+        if response_num!=0:
+            src_ctx = '[CLS] ' +"|".join(self.history_query[:-response_num] + self.history[-2*response_num:-1])
+        else:
+            src_ctx = '[CLS] ' +"|".join(self.history_query[:-1])
         src_q = ' [Q] ' + self.history[-1] + '[MASK]' * self.max_query_length
         if self.turn_id == 0:
             input_ids = self.tokenizer.encode('[CLS] ' +src_q, max_length=self.max_query_length, add_special_tokens=False)
@@ -87,13 +83,15 @@ class Cqe(ConversationalQueryRewriter):
         query_token_weights = np.squeeze(LA.norm(embeddings[:,1:,:], axis=-1))
         
         rewrite_text = self.build_query(input_tokens, query_token_weights, self.l2_threshold)
-
+        if context:
+            self.history += [context]
 
         self.total_latency += time.time() - start_time
         return rewrite_text
 
     def reset_history(self):
         super().reset_history()
+        self.history_query = []
         self.history = []
 
     def build_query(self, query_tokens, query_token_weights, threshold):
