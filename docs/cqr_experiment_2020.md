@@ -13,7 +13,6 @@ The run is similar to the run for the [CQR experiment for CAsT2019](./cqr_experi
 ```shell=bash
 python -m experiments.run_retrieval \
       --experiment hqe \
-      --context_index msmarco-passage \
       --hits 1000 \
       --index cast2019 \
       --qid_queries $input_query_json \
