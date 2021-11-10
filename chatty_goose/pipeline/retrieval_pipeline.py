@@ -125,7 +125,7 @@ class RetrievalPipeline:
         # Reorder hits with reranker scores
         reranked = list(zip(hits, reranked_scores))
         reranked.sort(key=lambda x: x[1], reverse=True)
-
+        reranked_hits = []
         for hit, score in reranked:
             hit.score = score  #update score with rrf fusion score 
             reranked_hits.append(hit)
