@@ -10,7 +10,7 @@ default:
 export input_query_json=./treccastweb/2020/2020_manual_evaluation_topics_v1.0.json
 ```
 
-2. Download the evaluation answer files for [cast 2019](https://trec.nist.gov/data/cast/2019qrels.txt) and the evaluation answer files for [cast 2020](https://trec.nist.gov/data/cast/2020qrels.txt).
+2. Download the evaluation answer files for [cast 2019](https://trec.nist.gov/data/cast/2019qrels.txt) and [cast 2020](https://trec.nist.gov/data/cast/2020qrels.txt).
 
 ## Run CQE retrieval
 
@@ -24,6 +24,8 @@ python -m experiments.run_retrieval \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_bm25 \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/cqe_bm25.trec
 ```
 ### CQE Dense Retrieval
 ```shell=bash
@@ -33,6 +35,8 @@ python -m experiments.run_retrieval \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_dpr \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/cqe_dpr.trec
 ```
 ### CQE Sparse-Dense Hybrid Retrieval
 ```shell=bash
@@ -44,6 +48,8 @@ python -m experiments.run_retrieval \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_hybrid \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/cqe_hybrid.trec
 ```
 ### CQE fuse T5 Sparse-Dense Hybrid Retrieval
 ```shell=bash
@@ -55,16 +61,8 @@ python -m experiments.run_retrieval \
       --hits 1000 \
       --qid_queries $input_query_json \
       --output ./output/cqe_t5_hybrid \
-```
 
-The experiment will output the retrieval results at the specified location in TSV format. For other command line arguments, see [run_retrieval.py](../experiments/run_retrieval.py).
-
-## Evaluate CQR results
-
-Convert the TSV file from above to TREC format and use the TREC tool to evaluate the resuls in terms of Recall@1000, mAP and NDCG@1,3.
-
-```shell=bash
-python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel $trec_file
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/cqe_t5_hybrid.trec
 ```
 
 ## Evaluation results
@@ -89,21 +87,23 @@ Results for the CAsT 2019 and 2020 evaluation dataset are provided below. The re
 You can also add canonical response for task of CAsT2020 with the option `--add_response` to specify how many previous response to be added in the context.
 ```shell=bash
 python -m experiments.run_retrieval \
-      --experiment cqe or t5 or cqe_t5_fusion \
+      --experiment t5 \
       --cqe_l2_threshold 12 \
       --add_response 1 \
       --dense_index cast2019-tct_colbert-v2-hnsw \
       --index cast2019 \
       --hits 1000 \
       --qid_queries $input_query_json \
-      --output ./output/cqe_t5_hybrid \
+      --output ./output/t5_hybrid \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/t5_hybrid.trec
 ```
-| CAsT2020    | CQE Hybrid | T5 Hybrid |
-| ----------- | :----------------: | :----------------: |
-| mAP         |       0.2225       |       0.2333       |
-| Recall@1000 |       0.7457       |       0.6930       |
-| NDCG@1      |       0.3353       |       0.3934       |
-| NDCG@3      |       0.3106       |       0.3406       |
+| CAsT2020    | T5 Hybrid |
+| ----------- | :----------------: |
+| mAP         |       0.2333       |
+| Recall@1000 |       0.6930       |
+| NDCG@1      |       0.3934       |
+| NDCG@3      |       0.3406       |
 
 ## Reproduction Log
 
