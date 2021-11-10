@@ -76,12 +76,12 @@ python -m experiments.run_retrieval \
 python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/result.trec
 ```
 
-|             | HQE BM25 |   T5 BM25      |   Fusion BM25  |
-| ----------- | :------: | :------------: | :------------: |
-| mAP         |  0.0948  |    0.1319      |     0.1446     |
-| Recall@1000 |  0.5755  |    0.5747      |     0.6618     |
-| NDCG@1      |  0.1306  |    0.1955      |     0.2011     |
-| NDCG@3      |  0.1185  |    0.1785      |     0.1967     |
+|             | HQE BM25 |   T5 BM25      |   Fusion BM25  |   Fusion BM25 Rerank  |
+| ----------- | :------: | :------------: | :------------: | :------------: |
+| mAP         |  0.0948  |    0.1319      |     0.1446     |     0.2861     |
+| Recall@1000 |  0.5755  |    0.5747      |     0.6618     |     0.6618     |
+| NDCG@1      |  0.1306  |    0.1955      |     0.2011     |     0.4623     |
+| NDCG@3      |  0.1185  |    0.1785      |     0.1967     |     0.4202     |
 
 
 ## Reproduction Log

@@ -69,14 +69,14 @@ python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./
 
 Results for the CAsT 2019 and 2020 evaluation dataset are provided below. The results may be slightly different from the numbers reported in the paper due to implementation differences between Huggingface and SpaCy versions. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`. Note that the Recall@1000 reported in [CQE paper]((https://arxiv.org/abs/2104.08707)) are using rel greater than 2 but in the repo, to be consistent with other previous experiments, we use rel greater than 1.
 
-| CAsT2019    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
+| CAsT2019    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Hybrid Fusion |
 | ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
 | mAP         |  0.2059  |     0.2616      |     0.2997      | 0.2250  |     0.2512     |   0.3043    |       0.3391       |
 | Recall@1000 |  0.7705  |     0.7248      |     0.7984      | 0.7392  |     0.6734     |   0.7856    |       0.8376       |
 | NDCG@1      |  0.3030  |     0.5082      |     0.4971      | 0.2842  |     0.4841     |   0.5077    |       0.5318       |
 | NDCG@3      |  0.2740  |     0.4924      |     0.5032      | 0.2954  |     0.4688     |   0.5065    |       0.5226       |
 
-| CAsT2020    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Fusion |
+| CAsT2020    | CQE BM25 | CQE Dense Retrieval | CQE Hybrid | T5 BM25 | T5 Dense Retrieval | T5 Hybrid | CQE+T5 Hybrid Fusion |
 | ----------- | :------: | :-------------: | :-------------: | :-----: | :------------: | :---------: | :----------------: |
 | mAP         |  0.1301  |     0.2072      |     0.2400      | 0.1236  |     0.1989     |   0.2309    |       0.2495       |
 | Recall@1000 |  0.6097  |     0.7008      |     0.7410      | 0.5551  |     0.6380     |   0.6983    |       0.7638       |
