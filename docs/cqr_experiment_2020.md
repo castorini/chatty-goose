@@ -6,19 +6,10 @@
 
 2. Download the evaluation answer files for [evaluation](https://trec.nist.gov/data/cast/2020qrels.txt).
 
-## Run CQR retrieval
+## Run and evaluate CQR retrieval
 
 The run is similar to the run for the [CQR experiment for CAsT2019](./cqr_experiments.md#run-cqr-retrieval). For canonical runs, you also need to specify an extra `--context_index` flag to define the index from which the canonical passage is retrieved from. `--add_response` controls how many previous response you want to add to the context; 0 represents using historical query only.
 
-```shell=bash
-python -m experiments.run_retrieval \
-      --experiment hqe \
-      --hits 1000 \
-      --index cast2019 \
-      --qid_queries $input_query_json \
-      --output ./output/hqe_bm25 \
-      --add_response 2 \
-```
 
 The index `cast2019` can still be used to perform bm25 search since `cast2019` and `cast2020` share the same corpus. 
 
@@ -34,6 +25,17 @@ Results for the CAsT 2020 evaluation dataset are provided below for both naive a
 
 ### Historical Query only
 
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment hqe or t5 or hqe_t5_fusion \
+      --hits 1000 \
+      --sparse_index cast2019 \
+      --qid_queries $input_query_json \
+      --output ./output/result \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/result.trec
+```
+
 |             | HQE BM25 |    T5 BM25      | Fusion BM25 |
 | ----------- | :------: | :-------------: | :---------: |
 | mAP         |  0.1155  |     0.1236      |   0.1386    |
@@ -45,6 +47,18 @@ Results for the CAsT 2020 evaluation dataset are provided below for both naive a
 
 ### One Canonical Response
 
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment hqe or t5 or hqe_t5_fusion \
+      --hits 1000 \
+      --sparse_index cast2019 \
+      --qid_queries $input_query_json \
+      --output ./output/result \
+      --add_response 1 \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/result.trec
+```
+
 |             | HQE BM25 |    T5 BM25      | Fusion BM25 |
 | ----------- | :------: | :-------------: | :---------: |
 | mAP         |  0.1061  |     0.1271      |   0.1478    |
@@ -55,6 +69,18 @@ Results for the CAsT 2020 evaluation dataset are provided below for both naive a
 ---------
 
 ### Two Canonical Response
+
+```shell=bash
+python -m experiments.run_retrieval \
+      --experiment hqe or t5 or hqe_t5_fusion \
+      --hits 1000 \
+      --sparse_index cast2019 \
+      --qid_queries $input_query_json \
+      --output ./output/result \
+      --add_response 2 \
+
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/result.trec
+```
 
 |             | HQE BM25 |   T5 BM25      |   Fusion BM25  |
 | ----------- | :------: | :------------: | :------------: |

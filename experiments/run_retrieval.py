@@ -16,10 +16,10 @@ from pyserini.dsearch import SimpleDenseSearcher
 
 def parse_experiment_args():
     parser = argparse.ArgumentParser(description='CQR experiments for CAsT 2019.')
-    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, fusion, cqe_t5_fusion)')
+    parser.add_argument('--experiment', type=str, help='Type of experiment (cqe, hqe, t5, hqe_t5_fusion, cqe_t5_fusion)')
     parser.add_argument('--qid_queries', required=True, default='', help='query id - query mapping file')
     parser.add_argument('--output', required=True, default='', help='output file')
-    parser.add_argument('--index', default=None, help='bm25 index path')
+    parser.add_argument('--sparse_index', default=None, help='bm25 index path')
     parser.add_argument('--dense_index', default=None, help='dense index path')
     parser.add_argument('--context_index', default='cast2019', help='index for searching context text')
     parser.add_argument('--query_encoder', default='castorini/tct_colbert-v2-msmarco', help='query encoder model path')
@@ -130,17 +130,17 @@ def run_experiment(rp: RetrievalPipeline):
 
 if __name__ == "__main__":
     args = parse_experiment_args()
-    assert (args.index!=None) or (args.dense_index!=None), "Must input at least one index for search"
-    if args.index==None:
+    assert (args.sparse_index!=None) or (args.dense_index!=None), "Must input at least one index for search"
+    if args.sparse_index==None:
         assert (args.context_index!=None) or (args.add_response==0), "Must input argument context_index"
     else:
-        args.context_index = args.index
+        args.context_index = args.sparse_index
     if args.run_name==None:
         args.run_name = 'chatty-goose_' + args.experiment
     experiment = CqrType(args.experiment)
 
     searcher_settings = SearcherSettings(
-        index_path=args.index,
+        index_path=args.sparse_index,
         k1=args.k1,
         b=args.b,
         rm3=args.rm3,
@@ -149,6 +149,9 @@ if __name__ == "__main__":
         original_query_weight=args.original_query_weight,
     )
 
+    if experiment == CqrType.HQE or experiment == CqrType.HQE_T5_FUSION:
+        #Currently, dense retrieval does not support HQE since it requires longer query sequence
+        assert (args.dense_index==None), "HQE does not support dense retrieval. Do not input dense index while using HQE."
     dense_searcher_settings = DenseSearcherSettings(
         index_path=args.dense_index,
         query_encoder=args.query_encoder,
@@ -162,7 +165,7 @@ if __name__ == "__main__":
     reranker_query_reformulator = None
     reranker = build_bert_reranker(device=args.reranker_device) if args.rerank else None
 
-    if experiment == CqrType.HQE or experiment == CqrType.FUSION:
+    if experiment == CqrType.HQE or experiment == CqrType.HQE_T5_FUSION:
         hqe_bm25_settings = HqeSettings(
             M=args.M0,
             eta=args.eta0,
@@ -174,7 +177,7 @@ if __name__ == "__main__":
         hqe_bm25 = Hqe(searcher, hqe_bm25_settings)
         reformulators.append(hqe_bm25)
 
-    if experiment == CqrType.T5 or experiment == CqrType.FUSION or experiment == CqrType.CQE_T5_FUSION:
+    if experiment == CqrType.T5 or experiment == CqrType.HQE_T5_FUSION or experiment == CqrType.CQE_T5_FUSION:
         # Initialize T5 NTR
         t5_settings = NtrSettings(
             model_name=args.t5_model_name,
