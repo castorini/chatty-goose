@@ -15,12 +15,6 @@ The index `cast2019` can still be used to perform bm25 search since `cast2019` a
 
 In the naive run, only the `raw_utterance` is used. In the canonical run, the passage corresponding to `manual_canonical_result_id` is also used in the context. 
 
-## Evaluate CQR results
-
-Evaluation is done in same way as described in [CQR experiment for CAsT2019](./cqr_experiments.md#evaluate-cqr-results).
-
-## Evaluation results
-
 Results for the CAsT 2020 evaluation dataset are provided below for both naive and canonical runs. As of writing, we use `spacy==2.2.4` with the English model `en_core_web_sm==2.2.5`, and `transformers==4.0.0`.
 
 ### Historical Query only

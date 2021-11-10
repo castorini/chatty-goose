@@ -2,15 +2,15 @@
 This is the Chatty-goose reproduction of our paper: *[Contextualized Query Embeddings for Conversational Search](https://arxiv.org/abs/2104.08707)* Sheng-Chieh Lin, Jheng-Hong Yang and Jimmy Lin. Note that, due to quey latency concern, different from our orginal paper and [CQE github](https://github.com/castorini/CQE), in this repo, we use HSW dense index; thus, the result may be slightly different.
 ## Data Preparation
 
-1. Download either the [training](https://github.com/daltonj/treccastweb/blob/master/2019/data/training/train_topics_v1.0.json) and [evaluation](https://github.com/daltonj/treccastweb/blob/master/2019/data/evaluation/evaluation_topics_v1.0.json) input query JSON files. These files can be found under `data/treccastweb/2019/data` if you cloned the submodules for this repo.
+1. Download the input query JSON files for [cast 2019](https://github.com/daltonj/treccastweb/blob/master/2019/data/evaluation/evaluation_topics_v1.0.json) and the [cast 2020](https://github.com/daltonj/treccastweb/blob/master/2019/data/evaluation/evaluation_topics_v1.0.json). These files can be found under `data/treccastweb/2019/data` and `data/treccastweb/2020`, respectively, if you cloned the submodules for this repo.
 
-Pass your pathname to a variable
+Pass your pathname to a variable. Here we use cast2020 as an example.
 default:
 ```shell=bash
-export input_query_json=data/treccastweb/2019/data
+export input_query_json=./treccastweb/2020/2020_manual_evaluation_topics_v1.0.json
 ```
 
-2. Download the evaluation answer files for [training](https://github.com/daltonj/treccastweb/blob/master/2019/data/training/train_topics_mod.qrel) or [evaluation](https://trec.nist.gov/data/cast/2019qrels.txt). The training answer file is found under `data/treccastweb/2019/data`.
+2. Download the evaluation answer files for [cast 2019](https://trec.nist.gov/data/cast/2019qrels.txt) and the evaluation answer files for [cast 2020](https://trec.nist.gov/data/cast/2020qrels.txt).
 
 ## Run CQE retrieval
 
