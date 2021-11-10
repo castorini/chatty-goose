@@ -106,6 +106,7 @@ python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./
 | NDCG@1      |     0.4623     |
 | NDCG@3      |     0.4202     |
 
+This [link](https://colab.research.google.com/drive/1KBm-BJAy9Yhb5b7NMuuW4v_gj8KJ0VAv?usp=sharing) is the Colab demo for HQE-T5 early fusion with BERT reranking.
 ## Reproduction Log
 
 
