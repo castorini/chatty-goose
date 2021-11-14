@@ -210,7 +210,6 @@ if __name__ == "__main__":
         cqe = Cqe(cqe_settings, device=args.cqe_device)
         reformulators.append(cqe)
 
-
     rp = RetrievalPipeline(
         searcher,
         dense_searcher,
