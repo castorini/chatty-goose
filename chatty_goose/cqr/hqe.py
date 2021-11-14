@@ -34,42 +34,63 @@ class Hqe(ConversationalQueryRewriter):
         self.searcher = searcher
 
         # History
-        self.key_word_list = collections.defaultdict(list)
-        self.subkey_word_list = collections.defaultdict(list)
+        self.q_key_word_list = collections.defaultdict(list)
+        self.q_subkey_word_list = collections.defaultdict(list)
 
-    def rewrite(self, query: str, context: Optional[str] = None) -> str:
+        self.r_key_word_list = collections.defaultdict(list)
+        self.r_subkey_word_list = collections.defaultdict(list)
+
+    def rewrite(self, query: str, context: Optional[str] = None, response_num: Optional[int] = 0) -> str:
         start_time = time.time()
         self.turn_id += 1
-        self.key_word_extraction(context+" "+query if context else query)
-        if self.turn_id != 0:
+        # self.history_query += [query]
+        # if response_num!=0:
+        #     src_text = " ".join(self.history_query[:-response_num] + self.history[-2*response_num:])
+        # else:
+        #     src_text = " ".join(self.history_query)
+        
+        self.key_word_extraction(query, 'q')
+        if (response_num > 0):
+            self.key_word_extraction(context, 'r')
+        if self.turn_id>0:
             hits = self.searcher.search(query, 1)
-            key_word = self.query_expansion(
-                self.key_word_list, 0, self.turn_id)
+            if response_num>0:
+                key_word = self.query_expansion(self.q_key_word_list, 0, self.turn_id) + " "+ self.query_expansion(self.r_key_word_list, self.turn_id-response_num-1, self.turn_id-1)
+            else:
+                key_word = self.query_expansion(self.q_key_word_list, 0, self.turn_id)
             subkey_word = ""
             if len(hits) == 0 or hits[0].score <= self.eta:
                 end_turn = self.turn_id + 1
                 start_turn = end_turn - self.M
                 if start_turn < 0:
                     start_turn = 0
-                subkey_word = self.query_expansion(
-                    self.subkey_word_list, start_turn, end_turn
-                )
+                if response_num>0:
+                    subkey_word = self.query_expansion(self.q_subkey_word_list, start_turn, end_turn)+ " "  + self.query_expansion(self.r_subkey_word_list, self.turn_id-response_num-1, self.turn_id-1)
+                else:
+                    subkey_word = self.query_expansion(self.q_subkey_word_list, start_turn, end_turn)
             query = key_word + " " + subkey_word + " " + query
         self.total_latency += time.time() - start_time
+
         return query
 
     def reset_history(self):
         super().reset_history()
-        self.key_word_list = collections.defaultdict(list)
-        self.subkey_word_list = collections.defaultdict(list)
+        self.q_key_word_list = collections.defaultdict(list)
+        self.q_subkey_word_list = collections.defaultdict(list)
+        self.r_key_word_list = collections.defaultdict(list)
+        self.r_subkey_word_list = collections.defaultdict(list)
 
-    def key_word_extraction(self, query):
+
+    def key_word_extraction(self, query, content):
         proc_query = self.calc_word_score(query)
         # Extract topic keyword
         if self.pos_filter == "no":
             for i, word in enumerate(proc_query["word"]):
                 if proc_query["score"][i] >= self.R_topic:
-                    self.key_word_list[self.turn_id].append(word)
+                    if content=='r':
+                        self.r_key_word_list[self.turn_id].append(word)
+                    if content=='q':
+                        self.q_key_word_list[self.turn_id].append(word)
                 if (proc_query["score"][i] >= self.R_sub) & (
                     proc_query["score"][i] < self.R_topic
                 ):
@@ -78,20 +99,32 @@ class Hqe(ConversationalQueryRewriter):
             for i, word in enumerate(proc_query["word"]):
                 if ("NN" in proc_query["pos"][i]) or ("JJ" in proc_query["pos"][i]):
                     if proc_query["score"][i] >= self.R_topic:
-                        self.key_word_list[self.turn_id].append(word)
+                        if content=='r':
+                            self.r_key_word_list[self.turn_id].append(word)
+                        if content=='q':
+                            self.q_key_word_list[self.turn_id].append(word)
                     if (proc_query["score"][i] >= self.R_sub) & (
                         proc_query["score"][i] < self.R_topic
-                    ):
-                        self.subkey_word_list[self.turn_id].append(word)
+                    ):  
+                        if content=='r':
+                            self.r_subkey_word_list[self.turn_id].append(word)
+                        if content=='q':
+                            self.q_subkey_word_list[self.turn_id].append(word)
         elif self.pos_filter == "stp":
             for i, word in enumerate(proc_query["word"]):
                 if word not in STOP_WORDS:
                     if proc_query["score"][i] >= self.R_topic:
-                        self.key_word_list[self.turn_id].append(word)
+                        if content=='r':
+                            self.r_key_word_list[self.turn_id].append(word)
+                        if content=='q':
+                            self.q_key_word_list[self.turn_id].append(word)
                     if (proc_query["score"][i] >= self.R_sub) & (
                         proc_query["score"][i] < self.R_topic
                     ):
-                        self.subkey_word_list[self.turn_id].append(word)
+                        if content=='r':
+                            self.r_subkey_word_list[self.turn_id].append(word)
+                        if ontent=='q':
+                            self.q_key_word_list[self.turn_id].append(word)
 
     def calc_word_score(self, query):
         nlp_query = nlp(pre_process(query))
@@ -112,6 +145,8 @@ class Hqe(ConversationalQueryRewriter):
     @staticmethod
     def query_expansion(key_word_list, start_turn, end_turn):
         query_expansion = ""
+        if start_turn<0:
+            start_turn=0
         for turn in range(start_turn, end_turn + 1):
             for word in key_word_list[turn]:
                 query_expansion = query_expansion + " " + word

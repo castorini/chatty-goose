@@ -14,13 +14,13 @@ export input_query_json=data/treccastweb/2019/data
 
 ## Run CQR retrieval
 
-The following command is for HQE, but you can also run other CQR methods using `t5` or `fusion` instead of `hqe` as the input to the `--experiment` flag. Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--index` flag). It is also possible to supply a path to a local directory containing the index.
+The following command is for HQE, but you can also run other CQR methods using `t5` or `fusion` instead of `hqe` as the input to the `--experiment` flag. Running the command for the first time will download the CAsT 2019 index (or whatever index is specified for the `--sparse_index` flag). It is also possible to supply a path to a local directory containing the index.
 
 ```shell=bash
 python -m experiments.run_retrieval \
       --experiment hqe \
       --hits 1000 \
-      --index cast2019 \
+      --sparse_index cast2019 \
       --qid_queries $input_query_json \
       --output ./output/hqe_bm25 \
 ```
@@ -32,14 +32,7 @@ The experiment will output the retrieval results at the specified location in TS
 Convert the TSV file from above to TREC format and use the TREC tool to evaluate the resuls in terms of Recall@1000, mAP and NDCG@1,3.
 
 ```shell=bash
-python $path_to_anserini/tools/scripts/msmarco/convert_msmarco_to_trec_run.py \
-      --input ./output/hqe_bm25.tsv \
-      --output ./output/hqe_bm25.trec
-
-$path_to_anserini/tools/eval/trec_eval.9.0.4/trec_eval \
-      -c -mrecall.1000 -mmap -mndcg_cut.1,3 \
-      ./output/answer_file \
-      ./output/hqe_bm25.trec
+python -m pyserini.eval.trec_eval -c -mndcg_cut.3,1 -mrecall.1000 -mmap $qrel ./output/hqe_bm25.trec
 ```
 
 ## Evaluation results

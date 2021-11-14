@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('./pyserini') 
+# sys.path.append('./pyserini') 
 import logging
 from os import path
 from typing import Dict, List, Tuple
@@ -34,10 +34,10 @@ def reciprocal_rank_fusion(
             doc_scores[hit.docid] = (cur_rank + 1.0 / (k + pos), hit)
 
     # Sort by highest score
-    result = [
-        score_hit[1]
-        for _, score_hit in sorted(iter(doc_scores.items()), key=lambda kv: -kv[1][0])
-    ]
+    result = []
+    for _, score_hit in sorted(iter(doc_scores.items()), key=lambda kv: -kv[1][0]):
+        score_hit[1].score = score_hit[0]  #update score with rrf fusion score 
+        result.append(score_hit[1])
     return result
 
 

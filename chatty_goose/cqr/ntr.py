@@ -35,26 +35,30 @@ class Ntr(ConversationalQueryRewriter):
         )
         self.tokenizer = T5Tokenizer.from_pretrained(settings.model_name)
         self.nlp = English()
+        self.history_query = []
         self.history = []
-        self.has_canonical_context = False
 
-    def rewrite(self, query: str, context: Optional[str] = None) -> str:
+    def rewrite(self, query: str, context: Optional[str] = None, response_num: Optional[int] = 0) -> str:
         start_time = time.time()
-        self.turn_id += 1
 
         # If the passage from canonical result (context) is provided, it is added to history.
         # Since canonical passage can be large and there is limit on length of tokens,
         # only one passage for the new query is used at a time.
-        if len(self.history) >= 2 and self.has_canonical_context:
-            self.history.pop(-2)
-            self.has_canonical_context = False
-        if context:
-            self.history += [context]
-            self.has_canonical_context = True
+
+        # if len(self.history) >= 2 and self.has_canonical_context:
+        #     self.history.pop(-2)
+        #     self.has_canonical_context = False
+        self.history_query += [query]
+        self.history += [query]
+        
 
         # Build input sequence from query and history
-        self.history += [query]
-        src_text = " ||| ".join(self.history)
+        if response_num!=0:
+            src_text = " ||| ".join(self.history_query[:-response_num] + self.history[-2*response_num:])
+        else:
+            src_text = " ||| ".join(self.history_query)
+            
+
         src_text = " ".join([tok.text for tok in self.nlp(src_text)])
         input_ids = self.tokenizer(
             src_text, return_tensors="pt", add_special_tokens=True
@@ -74,9 +78,12 @@ class Ntr(ConversationalQueryRewriter):
             clean_up_tokenization_spaces=True,
             skip_special_tokens=True,
         )
+        if context:
+            self.history += [context]
         self.total_latency += time.time() - start_time
         return rewrite_text
 
     def reset_history(self):
         super().reset_history()
         self.history = []
+        self.history_query = []
